@@ -3,41 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <title>Episode 1 – Comic</title>
+
 <style>
   body {
     margin: 0;
-    background: #000;
-    color: #fff;
-    font-family: sans-serif;
+    background-color: black;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
   }
+
   img {
-    width: 100%;
+    max-width: 100%;
+    max-height: 95vh;
+    object-fit: contain;
     display: block;
     margin: 0 auto;
   }
-  audio {
+
+  #speedControl {
     position: fixed;
     bottom: 20px;
-    left: 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+  }
+
+  input[type=range] {
+    width: 60%;
   }
 </style>
 </head>
+
 <body>
 
 <!-- Background Music -->
-<audio controls autoplay loop>
-  <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
+<audio autoplay loop>
+  <source src="comicbook2/mysound.mp3" type="audio/mpeg">
 </audio>
 
-<!-- Comic Pages -->
-<img src="comicbook2/cover page.png">
-<img src="comicbook2/page 2.png">
-<img src="comicbook2/page 3.png">
-<img src="comicbook2/page 4.png">
-<img src="comicbook2/page 5.png">
-<img src="comicbook2/page 6.png">
-<img src="comicbook2/page 7.png">
-<img src="comicbook2/page 8.png">
+<!-- Comic Page -->
+<img id="comic" src="" alt="Comic Page">
+
+<!-- Speed Slider -->
+<div id="speedControl">
+  <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
+  <div>Flip Speed</div>
+</div>
+
+<script>
+let page = 0;
+
+// These filenames match the working version you confirmed
+let pages = [
+  "cover.jpg",
+  "page1.jpg",
+  "page2.jpg",
+  "page3.jpg",
+  "page4.jpg",
+  "page5.jpg",
+  "page6.jpg",
+  "page7.jpg",
+  "page8.jpg"
+];
+
+let flipSpeed = 6000; // default 6 seconds
+
+function showPage() {
+  document.getElementById("comic").src = "comicbook2/" + pages[page];
+}
+
+function nextPage() {
+  page = (page + 1) % pages.length;
+  showPage();
+}
+
+let timer = setInterval(nextPage, flipSpeed);
+showPage();
+
+// Slider to adjust speed
+document.getElementById("speedSlider").addEventListener("input", function() {
+  flipSpeed = this.value;
+  clearInterval(timer);
+  timer = setInterval(nextPage, flipSpeed);
+});
+</script>
 
 </body>
 </html>
