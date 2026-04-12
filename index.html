@@ -51,10 +51,11 @@
 </div>
 
 <script>
-let page = 0;
+// use old-style 'var' everywhere for maximum compatibility
+var page = 0;
 
-// EXACT filenames from your screenshot
-let pages = [
+// EXACT filenames from your folder
+var pages = [
   "cover page.png",
   "page 2.png",
   "page 3.png",
@@ -65,10 +66,12 @@ let pages = [
   "page 8.png"
 ];
 
-let flipSpeed = 6000; // default 6 seconds
+var flipSpeed = 6000; // default 6 seconds
+var timer = null;
 
 function showPage() {
-  document.getElementById("comic").src = "comicbook2/" + pages[page];
+  var img = document.getElementById("comic");
+  img.src = "comicbook2/" + pages[page];
 }
 
 function nextPage() {
@@ -76,14 +79,22 @@ function nextPage() {
   showPage();
 }
 
-let timer = setInterval(nextPage, flipSpeed);
+function startTimer() {
+  if (timer !== null) {
+    clearInterval(timer);
+  }
+  timer = setInterval(nextPage, flipSpeed);
+}
+
+// start
 showPage();
+startTimer();
 
 // Slider to adjust speed
-document.getElementById("speedSlider").addEventListener("input", function() {
-  flipSpeed = this.value;
-  clearInterval(timer);
-  timer = setInterval(nextPage, flipSpeed);
+var slider = document.getElementById("speedSlider");
+slider.addEventListener("input", function() {
+  flipSpeed = parseInt(this.value, 10);
+  startTimer();
 });
 </script>
 
