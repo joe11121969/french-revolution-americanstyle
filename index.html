@@ -36,8 +36,8 @@
 
 <body>
 
-<!-- Background Music -->
-<audio autoplay loop>
+<!-- Small Audio Player (manual play, loops forever) -->
+<audio controls loop style="position:fixed; bottom:20px; left:20px; z-index:9999;">
   <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
 </audio>
 
@@ -51,7 +51,7 @@
 </div>
 
 <script>
-// use old-style 'var' everywhere for maximum compatibility
+// old-school JS for maximum compatibility
 var page = 0;
 
 // EXACT filenames from your folder
