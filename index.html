@@ -33,6 +33,31 @@
   input[type=range] {
     width: 60%;
   }
+
+  /* Left and right triangles */
+  .navButton {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    color: white;
+    cursor: pointer;
+    z-index: 99999;
+    user-select: none;
+    opacity: 0.6;
+  }
+
+  .navButton:hover {
+    opacity: 1;
+  }
+
+  #leftBtn {
+    left: 20px;
+  }
+
+  #rightBtn {
+    right: 20px;
+  }
 </style>
 </head>
 
@@ -42,6 +67,10 @@
 <audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
   <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
 </audio>
+
+<!-- Manual Navigation Buttons -->
+<div id="leftBtn" class="navButton">&#9664;</div>
+<div id="rightBtn" class="navButton">&#9654;</div>
 
 <!-- Comic Page -->
 <img id="comic" src="" alt="Comic Page">
@@ -70,6 +99,7 @@ var pages = [
 
 var flipSpeed = 6000; // default 6 seconds
 var timer = null;
+var autoFlipPaused = false;
 
 function showPage() {
   var img = document.getElementById("comic");
@@ -81,11 +111,20 @@ function nextPage() {
   showPage();
 }
 
+function prevPage() {
+  page = (page - 1 + pages.length) % pages.length;
+  showPage();
+}
+
 function startTimer() {
   if (timer !== null) {
     clearInterval(timer);
   }
-  timer = setInterval(nextPage, flipSpeed);
+  timer = setInterval(function() {
+    if (!autoFlipPaused) {
+      nextPage();
+    }
+  }, flipSpeed);
 }
 
 // Start everything
@@ -98,6 +137,26 @@ slider.addEventListener("input", function() {
   flipSpeed = parseInt(this.value, 10);
   startTimer();
 });
+
+// Manual navigation buttons
+document.getElementById("leftBtn").addEventListener("click", function() {
+  autoFlipPaused = true;
+  prevPage();
+  resumeAutoFlip();
+});
+
+document.getElementById("rightBtn").addEventListener("click", function() {
+  autoFlipPaused = true;
+  nextPage();
+  resumeAutoFlip();
+});
+
+// Resume auto-flip after 5 seconds
+function resumeAutoFlip() {
+  setTimeout(function() {
+    autoFlipPaused = false;
+  }, 5000);
+}
 </script>
 
 </body>
