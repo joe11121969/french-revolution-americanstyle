@@ -20,12 +20,14 @@
     margin: 0 auto;
   }
 
+  /* Speed slider container */
   #speedControl {
     position: fixed;
     bottom: 20px;
     width: 100%;
     text-align: center;
     color: white;
+    z-index: 99999;
   }
 
   input[type=range] {
@@ -36,22 +38,22 @@
 
 <body>
 
-<!-- Small Audio Player (manual play, loops forever) -->
-<audio controls loop style="position:fixed; bottom:20px; left:20px; z-index:9999;">
+<!-- Audio Player (TOP LEFT) -->
+<audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
   <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
 </audio>
 
 <!-- Comic Page -->
 <img id="comic" src="" alt="Comic Page">
 
-<!-- Speed Slider -->
+<!-- Speed Slider (BOTTOM CENTER) -->
 <div id="speedControl">
   <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
   <div>Flip Speed</div>
 </div>
 
 <script>
-// old-school JS for maximum compatibility
+// Old-school JS for maximum compatibility
 var page = 0;
 
 // EXACT filenames from your folder
@@ -86,7 +88,7 @@ function startTimer() {
   timer = setInterval(nextPage, flipSpeed);
 }
 
-// start
+// Start everything
 showPage();
 startTimer();
 
