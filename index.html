@@ -126,9 +126,11 @@
   <!-- Back to Home Button -->
   <div id="homeBtn" class="homeButton">&#8592;</div>
 
-  <!-- Audio Player -->
-  <audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
-    <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
+  <!-- Audio Player (single, we swap its source in JS) -->
+  <audio id="bgMusic" controls loop
+         style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
+    <source id="musicSource" src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
   </audio>
 
   <!-- Navigation Buttons -->
@@ -148,12 +150,63 @@
 
 <script>
 /* ========================= */
+/*     COMIC DATA / CHAPTERS */
+/* ========================= */
+
+var page = 0;
+
+var pages = [
+  "cover page.png", // 0
+  "page 2.png",     // 1
+  "page 3.png",     // 2
+  "page 4.png",     // 3
+  "page 5.png",     // 4
+  "page 6.png",     // 5
+  "page 7.png",     // 6
+  "page 8.png",     // 7  <-- end of Chapter 1
+  "chapter2.png",   // 8  <-- Chapter 2 starts here
+  "luke.png",       // 9
+  "mason.png"       // 10
+];
+
+// chapter boundaries (you can tweak later)
+var chapter2StartIndex = 8;
+
+// music files
+var chapter1Music = "comicbook2/Smoke on the Horizon.mp3";
+var chapter2Music = "comicbook2/chapter2music.mp3";
+
+var flipSpeed = 6000;
+var timer = null;
+var autoFlipPaused = false;
+
+var audioElement = document.getElementById("bgMusic");
+var musicSource = document.getElementById("musicSource");
+var currentMusic = chapter1Music;
+
+/* ========================= */
+/*     MUSIC SWITCH LOGIC    */
+/* ========================= */
+
+function updateMusicForPage() {
+  var desiredMusic = (page >= chapter2StartIndex) ? chapter2Music : chapter1Music;
+
+  if (desiredMusic !== currentMusic) {
+    currentMusic = desiredMusic;
+    musicSource.src = currentMusic;
+    audioElement.load();
+    audioElement.play().catch(function(){});
+  }
+}
+
+/* ========================= */
 /*     SWITCH TO VIEWER      */
 /* ========================= */
 function startComic() {
   document.getElementById("hubScreen").style.display = "none";
   document.getElementById("viewerScreen").style.display = "block";
   showPage();
+  updateMusicForPage();
   startTimer();
 }
 
@@ -169,28 +222,9 @@ document.getElementById("homeBtn").addEventListener("click", function() {
 /*     COMIC VIEWER LOGIC    */
 /* ========================= */
 
-var page = 0;
-
-var pages = [
-  "cover page.png",
-  "page 2.png",
-  "page 3.png",
-  "page 4.png",
-  "page 5.png",
-  "page 6.png",
-  "page 7.png",
-  "page 8.png",
-  "chapter2.png",
-  "luke.png",
-  "mason.png"
-];
-
-var flipSpeed = 6000;
-var timer = null;
-var autoFlipPaused = false;
-
 function showPage() {
   document.getElementById("comic").src = "comicbook2/" + pages[page];
+  updateMusicForPage();
 }
 
 function nextPage() {
