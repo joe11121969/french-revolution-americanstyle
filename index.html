@@ -18,15 +18,8 @@
     inset: 0;
     background-color: black;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-  }
-
-  #hubTitle {
-    color: white;
-    font-size: 32px;
-    margin-bottom: 20px;
   }
 
   .thumbnail {
@@ -92,7 +85,6 @@
 
 <!-- HUB SCREEN -->
 <div id="hubScreen">
-  <div id="hubTitle">The French Revolution — American Style</div>
   <img src="cover page.png" class="thumbnail" onclick="openViewer()">
 </div>
 
@@ -119,19 +111,28 @@
 
 <script>
 /* ------------------------------
-   PAGE SETUP
+   PAGE ORDER (YOUR EXACT FILENAMES)
 --------------------------------*/
 var pages = [
+  // CHAPTER 1
+  "cover.png",
+  "page 2.png",
+  "page 3.png",
+  "page 4.png",
+  "page 5.png",
+  "page 6.png",
+  "page 7.png",
+  "page 8.png",
+
+  // CHAPTER 2
+  "chapter2.png",
+  "luke.png",
+  "sara.png",
+  "mason.png",
   "c2page1.png",
   "c2page2.png",
   "c2page3.png",
-  "c2page4.png",
-  "c2page5.png",
-  "c2page6.png",
-  "c2page7.png",
-  "c2page8.png",
-  "c2page9.png",
-  "c2page10.png"
+  "c2page4.png"
 ];
 
 var page = 0;
@@ -140,11 +141,12 @@ var flipSpeed = 5000;
 var autoFlipTimer = null;
 
 /* ------------------------------
-   MUSIC SETUP
+   MUSIC SETUP (YOUR EXACT FILENAMES)
 --------------------------------*/
 var chapter1Music = "Smoke on the Horizon.mp3";
-var chapter2Music = "capter2music.mp3";  // Correct filename
-var chapter2StartIndex = 8;
+var chapter2Music = "chapter2music.mp3";
+
+var chapter2StartIndex = 8; // after 8 chapter 1 pages
 
 var audioElement = document.getElementById("audioPlayer");
 var musicSource = document.getElementById("musicSource");
@@ -178,7 +180,7 @@ function loadPage() {
 }
 
 /* ------------------------------
-   MUSIC SWITCHING (old working version)
+   MUSIC SWITCHING (RESPECT PAUSE)
 --------------------------------*/
 function updateMusicForPage() {
   var desiredMusic = (page >= chapter2StartIndex) ? chapter2Music : chapter1Music;
@@ -186,10 +188,18 @@ function updateMusicForPage() {
   if (desiredMusic !== currentMusic) {
     currentMusic = desiredMusic;
 
+    // Was the user listening?
+    var wasPlaying = !audioElement.paused;
+
+    // Switch track
     musicSource.src = currentMusic + "?v=" + Date.now();
     audioElement.pause();
     audioElement.load();
-    audioElement.play().catch(e => console.log("Autoplay blocked."));
+
+    // Only auto-play if user was already listening
+    if (wasPlaying) {
+      audioElement.play().catch(e => console.log("Autoplay blocked."));
+    }
   }
 }
 
