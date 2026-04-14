@@ -2,14 +2,51 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Episode 1 – Comic</title>
+<title>The French Revolution — American Style</title>
 
 <style>
   body {
     margin: 0;
     background-color: black;
-    overflow: hidden;
     font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  /* HUB SCREEN (start screen) */
+  #hubScreen {
+    position: absolute;
+    inset: 0;
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .thumb {
+    height: 200px;
+    border: 2px solid white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .thumb:hover {
+    transform: scale(1.1);
+  }
+
+  .titleText {
+    color: white;
+    margin-top: 15px;
+    font-size: 22px;
+    text-align: center;
+  }
+
+  /* VIEWER SCREEN (hidden until thumbnail clicked) */
+  #viewerScreen {
+    display: none;
+    width: 100%;
+    height: 100%;
   }
 
   img {
@@ -20,7 +57,7 @@
     margin: 0 auto;
   }
 
-  /* Speed slider container (BOTTOM RIGHT, small like audio player) */
+  /* Speed slider container (BOTTOM RIGHT) */
   #speedControl {
     position: fixed;
     bottom: 20px;
@@ -35,10 +72,10 @@
   }
 
   #speedControl input[type=range] {
-    width: 120px; /* smaller slider */
+    width: 120px;
   }
 
-  /* Left and right triangles */
+  /* Navigation arrows */
   .navButton {
     position: fixed;
     top: 50%;
@@ -49,48 +86,70 @@
     z-index: 999999;
     user-select: none;
     opacity: 0.7;
-    padding: 40px; /* HUGE click area */
+    padding: 40px;
   }
 
   .navButton:hover {
     opacity: 1;
   }
 
-  #leftBtn {
-    left: 10%;
-  }
-
-  #rightBtn {
-    right: 10%;
-  }
+  #leftBtn { left: 10%; }
+  #rightBtn { right: 10%; }
 </style>
 </head>
 
 <body>
 
-<!-- Audio Player (TOP LEFT) -->
-<audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
-  <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
-</audio>
+<!-- ========================= -->
+<!--       HUB SCREEN          -->
+<!-- ========================= -->
+<div id="hubScreen">
+  <img src="comicbook2/cover page.png" class="thumb" onclick="startComic()">
+  <div class="titleText">The French Revolution — American Style</div>
+</div>
 
-<!-- Manual Navigation Buttons -->
-<div id="leftBtn" class="navButton">&#9664;</div>
-<div id="rightBtn" class="navButton">&#9654;</div>
+<!-- ========================= -->
+<!--      VIEWER SCREEN        -->
+<!-- ========================= -->
+<div id="viewerScreen">
 
-<!-- Comic Page -->
-<img id="comic" src="" alt="Comic Page">
+  <!-- Audio Player -->
+  <audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
+    <source src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
+  </audio>
 
-<!-- Speed Slider (BOTTOM RIGHT) -->
-<div id="speedControl">
-  <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
-  <div>Flip Speed</div>
+  <!-- Navigation Buttons -->
+  <div id="leftBtn" class="navButton">&#9664;</div>
+  <div id="rightBtn" class="navButton">&#9654;</div>
+
+  <!-- Comic Page -->
+  <img id="comic" src="" alt="Comic Page">
+
+  <!-- Speed Slider -->
+  <div id="speedControl">
+    <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
+    <div>Flip Speed</div>
+  </div>
+
 </div>
 
 <script>
-// Old-school JS for maximum compatibility
+/* ========================= */
+/*     SWITCH TO VIEWER      */
+/* ========================= */
+function startComic() {
+  document.getElementById("hubScreen").style.display = "none";
+  document.getElementById("viewerScreen").style.display = "block";
+  showPage();
+  startTimer();
+}
+
+/* ========================= */
+/*     COMIC VIEWER LOGIC    */
+/* ========================= */
+
 var page = 0;
 
-// EXACT filenames from your folder
 var pages = [
   "cover page.png",
   "page 2.png",
@@ -102,21 +161,15 @@ var pages = [
   "page 8.png",
   "chapter2.png",
   "luke.png",
-  "mason.png",
-  "sara.png",
-  "c2page1.png",
-  "c2page2.png",
-  "c2page3.png",
-  "c2page4.png"
+  "mason.png"
 ];
 
-var flipSpeed = 6000; // default 6 seconds
+var flipSpeed = 6000;
 var timer = null;
 var autoFlipPaused = false;
 
 function showPage() {
-  var img = document.getElementById("comic");
-  img.src = "comicbook2/" + pages[page];
+  document.getElementById("comic").src = "comicbook2/" + pages[page];
 }
 
 function nextPage() {
@@ -130,38 +183,29 @@ function prevPage() {
 }
 
 function startTimer() {
-  if (timer !== null) {
-    clearInterval(timer);
-  }
+  if (timer !== null) clearInterval(timer);
+
   timer = setInterval(function() {
-    if (!autoFlipPaused) {
-      nextPage();
-    }
+    if (!autoFlipPaused) nextPage();
   }, flipSpeed);
 }
 
-// Start everything
-showPage();
-startTimer();
-
-// Slider to adjust speed
+/* Slider logic */
 var slider = document.getElementById("speedSlider");
 slider.addEventListener("input", function() {
   flipSpeed = parseInt(this.value, 10);
 
-  // If slider is at max → stop auto flipping
   if (flipSpeed === 15000) {
     autoFlipPaused = true;
     clearInterval(timer);
     return;
   }
 
-  // Otherwise resume normal auto-flip
   autoFlipPaused = false;
   startTimer();
 });
 
-// Manual navigation buttons
+/* Navigation buttons */
 document.getElementById("leftBtn").addEventListener("click", function() {
   autoFlipPaused = true;
   prevPage();
@@ -174,12 +218,10 @@ document.getElementById("rightBtn").addEventListener("click", function() {
   resumeAutoFlip();
 });
 
-// Resume auto-flip after 5 seconds
+/* Resume auto-flip after 5 seconds unless slider is maxed */
 function resumeAutoFlip() {
   setTimeout(function() {
-    if (flipSpeed < 15000) { // only resume if slider isn't maxed
-      autoFlipPaused = false;
-    }
+    if (flipSpeed < 15000) autoFlipPaused = false;
   }, 5000);
 }
 </script>
