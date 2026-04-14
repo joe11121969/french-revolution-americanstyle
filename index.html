@@ -12,7 +12,7 @@
     overflow: hidden;
   }
 
-  /* HUB SCREEN (start screen) */
+  /* HUB SCREEN */
   #hubScreen {
     position: absolute;
     inset: 0;
@@ -93,7 +93,7 @@
 <!-- HUB SCREEN -->
 <div id="hubScreen">
   <div id="hubTitle">The French Revolution — American Style</div>
-  <img src="chapter2.png" class="thumbnail" onclick="openViewer()">
+  <img src="cover page.png" class="thumbnail" onclick="openViewer()">
 </div>
 
 <!-- VIEWER SCREEN -->
@@ -119,7 +119,7 @@
 
 <script>
 /* ------------------------------
-   PAGE & IMAGE SETUP
+   PAGE SETUP
 --------------------------------*/
 var pages = [
   "c2page1.png",
@@ -143,7 +143,7 @@ var autoFlipTimer = null;
    MUSIC SETUP
 --------------------------------*/
 var chapter1Music = "Smoke on the Horizon.mp3";
-var chapter2Music = "capter2music.mp3";  // Correct filename from your repo
+var chapter2Music = "capter2music.mp3";  // Correct filename
 var chapter2StartIndex = 8;
 
 var audioElement = document.getElementById("audioPlayer");
@@ -178,7 +178,7 @@ function loadPage() {
 }
 
 /* ------------------------------
-   MUSIC SWITCHING (RESPECT PAUSE)
+   MUSIC SWITCHING (old working version)
 --------------------------------*/
 function updateMusicForPage() {
   var desiredMusic = (page >= chapter2StartIndex) ? chapter2Music : chapter1Music;
@@ -186,18 +186,10 @@ function updateMusicForPage() {
   if (desiredMusic !== currentMusic) {
     currentMusic = desiredMusic;
 
-    // Was the user listening?
-    var wasPlaying = !audioElement.paused;
-
-    // Switch track
     musicSource.src = currentMusic + "?v=" + Date.now();
     audioElement.pause();
     audioElement.load();
-
-    // Only auto-play if user was already listening
-    if (wasPlaying) {
-      audioElement.play().catch(e => console.log("Autoplay blocked."));
-    }
+    audioElement.play().catch(e => console.log("Autoplay blocked."));
   }
 }
 
