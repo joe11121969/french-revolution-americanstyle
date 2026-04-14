@@ -20,18 +20,22 @@
     margin: 0 auto;
   }
 
-  /* Speed slider container */
+  /* Speed slider container (BOTTOM RIGHT, small like audio player) */
   #speedControl {
     position: fixed;
     bottom: 20px;
-    width: 100%;
-    text-align: center;
+    right: 20px;
     color: white;
     z-index: 99999;
+    background: black;
+    padding: 8px 12px;
+    border-radius: 6px;
+    width: auto;
+    text-align: center;
   }
 
-  input[type=range] {
-    width: 60%;
+  #speedControl input[type=range] {
+    width: 120px; /* smaller slider */
   }
 
   /* Left and right triangles */
@@ -52,7 +56,6 @@
     opacity: 1;
   }
 
-  /* Pull them inward toward the center */
   #leftBtn {
     left: 10%;
   }
@@ -77,7 +80,7 @@
 <!-- Comic Page -->
 <img id="comic" src="" alt="Comic Page">
 
-<!-- Speed Slider (BOTTOM CENTER) -->
+<!-- Speed Slider (BOTTOM RIGHT) -->
 <div id="speedControl">
   <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
   <div>Flip Speed</div>
@@ -140,6 +143,16 @@ startTimer();
 var slider = document.getElementById("speedSlider");
 slider.addEventListener("input", function() {
   flipSpeed = parseInt(this.value, 10);
+
+  // If slider is at max → stop auto flipping
+  if (flipSpeed === 15000) {
+    autoFlipPaused = true;
+    clearInterval(timer);
+    return;
+  }
+
+  // Otherwise resume normal auto-flip
+  autoFlipPaused = false;
   startTimer();
 });
 
@@ -159,7 +172,9 @@ document.getElementById("rightBtn").addEventListener("click", function() {
 // Resume auto-flip after 5 seconds
 function resumeAutoFlip() {
   setTimeout(function() {
-    autoFlipPaused = false;
+    if (flipSpeed < 15000) { // only resume if slider isn't maxed
+      autoFlipPaused = false;
+    }
   }, 5000);
 }
 </script>
