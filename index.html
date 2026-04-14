@@ -88,6 +88,24 @@
 
   #leftBtn { left: 10%; }
   #rightBtn { right: 10%; }
+
+  /* Back to Home button (BOTTOM LEFT) */
+  .homeButton {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    font-size: 60px;
+    color: white;
+    cursor: pointer;
+    z-index: 999999;
+    user-select: none;
+    opacity: 0.7;
+    padding: 20px;
+  }
+
+  .homeButton:hover {
+    opacity: 1;
+  }
 </style>
 </head>
 
@@ -104,6 +122,9 @@
 <!--      VIEWER SCREEN        -->
 <!-- ========================= -->
 <div id="viewerScreen">
+
+  <!-- Back to Home Button -->
+  <div id="homeBtn" class="homeButton">&#8592;</div>
 
   <!-- Audio Player -->
   <audio controls loop style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
@@ -135,6 +156,14 @@ function startComic() {
   showPage();
   startTimer();
 }
+
+/* ========================= */
+/*     BACK TO HOME          */
+/* ========================= */
+document.getElementById("homeBtn").addEventListener("click", function() {
+  document.getElementById("viewerScreen").style.display = "none";
+  document.getElementById("hubScreen").style.display = "flex";
+});
 
 /* ========================= */
 /*     COMIC VIEWER LOGIC    */
