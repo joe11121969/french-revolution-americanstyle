@@ -12,13 +12,12 @@
     overflow: hidden;
   }
 
-  /* HUB SCREEN (start screen) */
+  /* HUB SCREEN */
   #hubScreen {
     position: absolute;
     inset: 0;
     background-color: black;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
   }
@@ -35,7 +34,7 @@
     transform: scale(1.1);
   }
 
-  /* VIEWER SCREEN (hidden until thumbnail clicked) */
+  /* VIEWER SCREEN */
   #viewerScreen {
     display: none;
     width: 100%;
@@ -50,7 +49,7 @@
     margin: 0 auto;
   }
 
-  /* Speed slider container (BOTTOM RIGHT) */
+  /* Speed slider */
   #speedControl {
     position: fixed;
     bottom: 20px;
@@ -89,7 +88,7 @@
   #leftBtn { left: 10%; }
   #rightBtn { right: 10%; }
 
-  /* Back to Home button (BOTTOM LEFT) */
+  /* Back to Home button */
   .homeButton {
     position: fixed;
     bottom: 20px;
@@ -111,29 +110,24 @@
 
 <body>
 
-<!-- ========================= -->
-<!--       HUB SCREEN          -->
-<!-- ========================= -->
+<!-- HUB SCREEN -->
 <div id="hubScreen">
   <img src="comicbook2/cover page.png" class="thumb" onclick="startComic()">
 </div>
 
-<!-- ========================= -->
-<!--      VIEWER SCREEN        -->
-<!-- ========================= -->
+<!-- VIEWER SCREEN -->
 <div id="viewerScreen">
 
-  <!-- Back to Home Button -->
+  <!-- Back to Home -->
   <div id="homeBtn" class="homeButton">&#8592;</div>
 
-  <!-- Audio Player (single, we swap its source in JS) -->
+  <!-- Audio Player -->
   <audio id="bgMusic" controls loop
          style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
     <source id="musicSource" src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
   </audio>
 
-  <!-- Navigation Buttons -->
+  <!-- Navigation -->
   <div id="leftBtn" class="navButton">&#9664;</div>
   <div id="rightBtn" class="navButton">&#9654;</div>
 
@@ -150,7 +144,7 @@
 
 <script>
 /* ========================= */
-/*     COMIC DATA / CHAPTERS */
+/*     PAGE + CHAPTER DATA   */
 /* ========================= */
 
 var page = 0;
@@ -164,21 +158,15 @@ var pages = [
   "page 6.png",     // 5
   "page 7.png",     // 6
   "page 8.png",     // 7  <-- end of Chapter 1
-  "chapter2.png",   // 8  <-- Chapter 2 starts here
+  "chapter2.png",   // 8  <-- Chapter 2 starts
   "luke.png",       // 9
   "mason.png"       // 10
 ];
 
-// chapter boundaries (you can tweak later)
 var chapter2StartIndex = 8;
 
-// music files
 var chapter1Music = "comicbook2/Smoke on the Horizon.mp3";
 var chapter2Music = "comicbook2/chapter2music.mp3";
-
-var flipSpeed = 6000;
-var timer = null;
-var autoFlipPaused = false;
 
 var audioElement = document.getElementById("bgMusic");
 var musicSource = document.getElementById("musicSource");
@@ -193,15 +181,23 @@ function updateMusicForPage() {
 
   if (desiredMusic !== currentMusic) {
     currentMusic = desiredMusic;
-    musicSource.src = currentMusic;
+
+    // Force browser to reload the file
+    musicSource.src = currentMusic + "?v=" + Date.now();
+
+    audioElement.pause();
     audioElement.load();
-    audioElement.play().catch(function(){});
+
+    audioElement.play().catch(function(e){
+      console.log("Autoplay blocked until user interacts.");
+    });
   }
 }
 
 /* ========================= */
 /*     SWITCH TO VIEWER      */
 /* ========================= */
+
 function startComic() {
   document.getElementById("hubScreen").style.display = "none";
   document.getElementById("viewerScreen").style.display = "block";
@@ -213,13 +209,14 @@ function startComic() {
 /* ========================= */
 /*     BACK TO HOME          */
 /* ========================= */
+
 document.getElementById("homeBtn").addEventListener("click", function() {
   document.getElementById("viewerScreen").style.display = "none";
   document.getElementById("hubScreen").style.display = "flex";
 });
 
 /* ========================= */
-/*     COMIC VIEWER LOGIC    */
+/*     PAGE DISPLAY LOGIC    */
 /* ========================= */
 
 function showPage() {
@@ -237,6 +234,14 @@ function prevPage() {
   showPage();
 }
 
+/* ========================= */
+/*     AUTO-FLIP LOGIC       */
+/* ========================= */
+
+var flipSpeed = 6000;
+var timer = null;
+var autoFlipPaused = false;
+
 function startTimer() {
   if (timer !== null) clearInterval(timer);
 
@@ -245,7 +250,6 @@ function startTimer() {
   }, flipSpeed);
 }
 
-/* Slider logic */
 var slider = document.getElementById("speedSlider");
 slider.addEventListener("input", function() {
   flipSpeed = parseInt(this.value, 10);
@@ -260,7 +264,10 @@ slider.addEventListener("input", function() {
   startTimer();
 });
 
-/* Navigation buttons */
+/* ========================= */
+/*     MANUAL NAVIGATION     */
+/* ========================= */
+
 document.getElementById("leftBtn").addEventListener("click", function() {
   autoFlipPaused = true;
   prevPage();
@@ -273,7 +280,6 @@ document.getElementById("rightBtn").addEventListener("click", function() {
   resumeAutoFlip();
 });
 
-/* Resume auto-flip after 5 seconds unless slider is maxed */
 function resumeAutoFlip() {
   setTimeout(function() {
     if (flipSpeed < 15000) autoFlipPaused = false;
