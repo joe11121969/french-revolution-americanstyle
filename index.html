@@ -12,278 +12,240 @@
     overflow: hidden;
   }
 
-  /* HUB SCREEN */
+  /* HUB SCREEN (start screen) */
   #hubScreen {
     position: absolute;
     inset: 0;
     background-color: black;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
   }
 
-  .thumb {
-    height: 200px;
-    border: 2px solid white;
-    border-radius: 6px;
+  #hubTitle {
+    color: white;
+    font-size: 32px;
+    margin-bottom: 20px;
+  }
+
+  .thumbnail {
+    width: 300px;
+    height: auto;
     cursor: pointer;
-    transition: transform 0.2s;
-  }
-
-  .thumb:hover {
-    transform: scale(1.1);
+    border: 3px solid white;
   }
 
   /* VIEWER SCREEN */
   #viewerScreen {
+    position: absolute;
+    inset: 0;
+    background-color: black;
     display: none;
-    width: 100%;
-    height: 100%;
+    flex-direction: column;
+    align-items: center;
   }
 
-  img {
+  #comicImage {
     max-width: 100%;
-    max-height: 95vh;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
+    max-height: 80vh;
+    margin-top: 20px;
   }
 
-  /* Speed slider */
-  #speedControl {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    color: white;
-    z-index: 99999;
-    background: black;
-    padding: 8px 12px;
-    border-radius: 6px;
-    width: auto;
-    text-align: center;
-  }
-
-  #speedControl input[type=range] {
-    width: 120px;
-  }
-
-  /* Navigation arrows */
+  /* NAV ARROWS */
   .navButton {
-    position: fixed;
+    position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 100px;
+    font-size: 48px;
     color: white;
     cursor: pointer;
-    z-index: 999999;
     user-select: none;
-    opacity: 0.7;
-    padding: 40px;
   }
 
-  .navButton:hover {
-    opacity: 1;
-  }
+  #prevBtn { left: 20px; }
+  #nextBtn { right: 20px; }
 
-  #leftBtn { left: 10%; }
-  #rightBtn { right: 10%; }
-
-  /* Back to Home button */
+  /* HOME BUTTON */
   .homeButton {
-    position: fixed;
+    position: absolute;
     bottom: 20px;
     left: 20px;
-    font-size: 60px;
+    font-size: 40px;
     color: white;
     cursor: pointer;
-    z-index: 999999;
     user-select: none;
-    opacity: 0.7;
-    padding: 20px;
   }
 
-  .homeButton:hover {
-    opacity: 1;
+  /* SLIDER */
+  #speedControl {
+    width: 300px;
+    margin-top: 10px;
+  }
+
+  #audioPlayer {
+    margin-top: 10px;
   }
 </style>
 </head>
-
 <body>
 
 <!-- HUB SCREEN -->
 <div id="hubScreen">
-  <img src="comicbook2/cover page.png" class="thumb" onclick="startComic()">
+  <div id="hubTitle">The French Revolution — American Style</div>
+  <img src="chapter2.png" class="thumbnail" onclick="openViewer()">
 </div>
 
 <!-- VIEWER SCREEN -->
 <div id="viewerScreen">
-
-  <!-- Back to Home -->
-  <div id="homeBtn" class="homeButton">&#8592;</div>
-
-  <!-- Audio Player -->
-  <audio id="bgMusic" controls loop
-         style="position:fixed; top:20px; left:20px; z-index:999999; background:black; padding:5px; border-radius:5px;">
-    <source id="musicSource" src="comicbook2/Smoke on the Horizon.mp3" type="audio/mpeg">
-  </audio>
+  <img id="comicImage" src="">
 
   <!-- Navigation -->
-  <div id="leftBtn" class="navButton">&#9664;</div>
-  <div id="rightBtn" class="navButton">&#9654;</div>
+  <div id="prevBtn" class="navButton" onclick="prevPage()">&#10094;</div>
+  <div id="nextBtn" class="navButton" onclick="nextPage()">&#10095;</div>
 
-  <!-- Comic Page -->
-  <img id="comic" src="" alt="Comic Page">
+  <!-- Back to Home -->
+  <div id="homeBtn" class="homeButton" onclick="goHome()">&#8592;</div>
 
-  <!-- Speed Slider -->
-  <div id="speedControl">
-    <input type="range" id="speedSlider" min="2000" max="15000" value="6000" step="500">
-    <div>Flip Speed</div>
-  </div>
+  <!-- Auto-flip speed slider -->
+  <input type="range" id="speedControl" min="1000" max="15000" value="5000" step="500"
+         oninput="updateSpeed()">
 
+  <!-- Audio Player -->
+  <audio id="audioPlayer" controls>
+    <source id="musicSource" src="">
+  </audio>
 </div>
 
 <script>
-/* ========================= */
-/*     PAGE + CHAPTER DATA   */
-/* ========================= */
-
-var page = 0;
-
+/* ------------------------------
+   PAGE & IMAGE SETUP
+--------------------------------*/
 var pages = [
-  "cover page.png", // 0
-  "page 2.png",     // 1
-  "page 3.png",     // 2
-  "page 4.png",     // 3
-  "page 5.png",     // 4
-  "page 6.png",     // 5
-  "page 7.png",     // 6
-  "page 8.png",     // 7  <-- end of Chapter 1
-  "chapter2.png",   // 8  <-- Chapter 2 starts
-  "luke.png",       // 9
-  "mason.png"       // 10
+  "c2page1.png",
+  "c2page2.png",
+  "c2page3.png",
+  "c2page4.png",
+  "c2page5.png",
+  "c2page6.png",
+  "c2page7.png",
+  "c2page8.png",
+  "c2page9.png",
+  "c2page10.png"
 ];
 
+var page = 0;
+var autoFlipPaused = false;
+var flipSpeed = 5000;
+var autoFlipTimer = null;
+
+/* ------------------------------
+   MUSIC SETUP
+--------------------------------*/
+var chapter1Music = "Smoke on the Horizon.mp3";
+var chapter2Music = "capter2music.mp3";  // Correct filename from your repo
 var chapter2StartIndex = 8;
 
-var chapter1Music = "comicbook2/Smoke on the Horizon.mp3";
-var chapter2Music = "comicbook2/capter2music.mp3";
-
-var audioElement = document.getElementById("bgMusic");
+var audioElement = document.getElementById("audioPlayer");
 var musicSource = document.getElementById("musicSource");
-var currentMusic = chapter1Music;
+var currentMusic = null;
 
-/* ========================= */
-/*     MUSIC SWITCH LOGIC    */
-/* ========================= */
+/* ------------------------------
+   OPEN VIEWER
+--------------------------------*/
+function openViewer() {
+  document.getElementById("hubScreen").style.display = "none";
+  document.getElementById("viewerScreen").style.display = "flex";
+  loadPage();
+  startAutoFlip();
+}
 
+/* ------------------------------
+   HOME BUTTON
+--------------------------------*/
+function goHome() {
+  document.getElementById("viewerScreen").style.display = "none";
+  document.getElementById("hubScreen").style.display = "flex";
+  stopAutoFlip();
+}
+
+/* ------------------------------
+   PAGE LOADING
+--------------------------------*/
+function loadPage() {
+  document.getElementById("comicImage").src = pages[page];
+  updateMusicForPage();
+}
+
+/* ------------------------------
+   MUSIC SWITCHING (RESPECT PAUSE)
+--------------------------------*/
 function updateMusicForPage() {
   var desiredMusic = (page >= chapter2StartIndex) ? chapter2Music : chapter1Music;
 
   if (desiredMusic !== currentMusic) {
     currentMusic = desiredMusic;
 
-    // Force browser to reload the file
-    musicSource.src = currentMusic + "?v=" + Date.now();
+    // Was the user listening?
+    var wasPlaying = !audioElement.paused;
 
+    // Switch track
+    musicSource.src = currentMusic + "?v=" + Date.now();
     audioElement.pause();
     audioElement.load();
 
-    audioElement.play().catch(function(e){
-      console.log("Autoplay blocked until user interacts.");
-    });
+    // Only auto-play if user was already listening
+    if (wasPlaying) {
+      audioElement.play().catch(e => console.log("Autoplay blocked."));
+    }
   }
 }
 
-/* ========================= */
-/*     SWITCH TO VIEWER      */
-/* ========================= */
-
-function startComic() {
-  document.getElementById("hubScreen").style.display = "none";
-  document.getElementById("viewerScreen").style.display = "block";
-  showPage();
-  updateMusicForPage();
-  startTimer();
-}
-
-/* ========================= */
-/*     BACK TO HOME          */
-/* ========================= */
-
-document.getElementById("homeBtn").addEventListener("click", function() {
-  document.getElementById("viewerScreen").style.display = "none";
-  document.getElementById("hubScreen").style.display = "flex";
-});
-
-/* ========================= */
-/*     PAGE DISPLAY LOGIC    */
-/* ========================= */
-
-function showPage() {
-  document.getElementById("comic").src = "comicbook2/" + pages[page];
-  updateMusicForPage();
-}
-
+/* ------------------------------
+   NAVIGATION
+--------------------------------*/
 function nextPage() {
-  page = (page + 1) % pages.length;
-  showPage();
+  if (page < pages.length - 1) {
+    page++;
+    loadPage();
+    pauseAutoFlip();
+  }
 }
 
 function prevPage() {
-  page = (page - 1 + pages.length) % pages.length;
-  showPage();
+  if (page > 0) {
+    page--;
+    loadPage();
+    pauseAutoFlip();
+  }
 }
 
-/* ========================= */
-/*     AUTO-FLIP LOGIC       */
-/* ========================= */
-
-var flipSpeed = 6000;
-var timer = null;
-var autoFlipPaused = false;
-
-function startTimer() {
-  if (timer !== null) clearInterval(timer);
-
-  timer = setInterval(function() {
-    if (!autoFlipPaused) nextPage();
+/* ------------------------------
+   AUTO-FLIP
+--------------------------------*/
+function startAutoFlip() {
+  autoFlipTimer = setInterval(function() {
+    if (!autoFlipPaused) {
+      nextPage();
+    }
   }, flipSpeed);
 }
 
-var slider = document.getElementById("speedSlider");
-slider.addEventListener("input", function() {
-  flipSpeed = parseInt(this.value, 10);
+function stopAutoFlip() {
+  clearInterval(autoFlipTimer);
+}
 
-  if (flipSpeed === 15000) {
-    autoFlipPaused = true;
-    clearInterval(timer);
-    return;
-  }
-
-  autoFlipPaused = false;
-  startTimer();
-});
-
-/* ========================= */
-/*     MANUAL NAVIGATION     */
-/* ========================= */
-
-document.getElementById("leftBtn").addEventListener("click", function() {
+function pauseAutoFlip() {
   autoFlipPaused = true;
-  prevPage();
-  resumeAutoFlip();
-});
-
-document.getElementById("rightBtn").addEventListener("click", function() {
-  autoFlipPaused = true;
-  nextPage();
-  resumeAutoFlip();
-});
-
-function resumeAutoFlip() {
-  setTimeout(function() {
+  setTimeout(() => {
     if (flipSpeed < 15000) autoFlipPaused = false;
   }, 5000);
+}
+
+function updateSpeed() {
+  flipSpeed = document.getElementById("speedControl").value;
+  stopAutoFlip();
+  startAutoFlip();
 }
 </script>
 
