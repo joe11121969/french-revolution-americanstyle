@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Comic Viewer</title>
+
+<style>
+  body {
+    margin: 0;
+    background-color: black;
+    overflow: hidden;
+  }
+
+  #comicImage {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  /* Manual arrows */
+  .navButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  #prevBtn { left: 20px; }
+  #nextBtn { right: 20px; }
+
+  /* Speed slider */
+  #speedControl {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 150px;
+  }
+
+  /* Back-to-home arrow */
+  #homeBtn {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    font-size: 50px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+  }
+</style>
+</head>
+
+<body>
+
+<img id="comicImage" src="">
+
+<!-- Manual arrows -->
+<div id="prevBtn" class="navButton" onclick="prevPage()">&#10094;</div>
+<div id="nextBtn" class="navButton" onclick="nextPage()">&#10095;</div>
+
+<!-- Back to home -->
+<div id="homeBtn" onclick="window.location.href='index.html'">&#8592;</div>
+
+<!-- Speed slider -->
+<input type="range" id="speedControl" min="1000" max="15000" value="5000" step="500" oninput="updateSpeed()">
+
+<script>
+/* ------------------------------
+   PAGE ORDER
+--------------------------------*/
+var pages = [
+  "capter1/c1p1.png",
+  "capter1/c1p2.png",
+  "capter1/c1p3.png",
+  "capter1/c1p4.png",
+  "capter1/c1p5.png",
+  "capter1/c1p6.png",
+  "capter1/c1p7.png",
+  "capter1/c1p8.png",
+
+  "chapter2/c2p1.png",
+  "chapter2/c2p2.png",
+  "chapter2/c2p3.png",
+  "chapter2/c2p4.png",
+  "chapter2/c2p5.png",
+  "chapter2/c2p6.png",
+  "chapter2/c2p7.png",
+  "chapter2/c2p8.png"
+];
+
+var page = 0;
+var flipSpeed = 5000;
+var autoFlipTimer = null;
+
+/* ------------------------------
+   LOAD PAGE
+--------------------------------*/
+function loadPage() {
+  document.getElementById("comicImage").src = pages[page];
+}
+
+/* ------------------------------
+   AUTO-FLIP
+--------------------------------*/
+function startAutoFlip() {
+  stopAutoFlip();
+  autoFlipTimer = setInterval(function() {
+    if (flipSpeed < 15000) {
+      nextPage();
+    }
+  }, flipSpeed);
+}
+
+function stopAutoFlip() {
+  if (autoFlipTimer) clearInterval(autoFlipTimer);
+}
+
+/* ------------------------------
+   MANUAL NAVIGATION
+--------------------------------*/
+function nextPage() {
+  page = (page + 1) % pages.length;
+  loadPage();
+  startAutoFlip();
+}
+
+function prevPage() {
+  page = (page - 1 + pages.length) % pages.length;
+  loadPage();
+  startAutoFlip();
+}
+
+/* ------------------------------
+   SPEED SLIDER
+--------------------------------*/
+function updateSpeed() {
+  flipSpeed = document.getElementById("speedControl").value;
+  startAutoFlip();
+}
+
+/* ------------------------------
+   INIT
+--------------------------------*/
+loadPage();
+startAutoFlip();
+</script>
+
+</body>
+</html>
