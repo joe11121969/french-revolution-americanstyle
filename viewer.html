@@ -53,11 +53,22 @@
             z-index: 999999;
             width: 200px;
         }
+
+        /* Speed Slider */
+        #speedControl {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            color: white;
+            font-size: 18px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
 
-<!-- ⭐ MUSIC PLAYER (top-left) -->
+<!-- ⭐ MUSIC PLAYER -->
 <audio id="musicPlayer" controls loop>
     <source id="musicSource" src="music/c1m1.mp3" type="audio/mpeg">
 </audio>
@@ -71,6 +82,12 @@
 
 <!-- ⭐ COMIC IMAGE -->
 <img id="comicImage" src="capter1/c1p1.png">
+
+<!-- ⭐ SPEED SLIDER -->
+<div id="speedControl">
+    Auto‑Flip Speed<br>
+    <input type="range" id="speedSlider" min="1" max="10" value="5">
+</div>
 
 <script>
 /* -----------------------------------------
@@ -140,7 +157,7 @@ function updateMusicForPage(pageIndex) {
 }
 
 /* -----------------------------------------
-   PAGE FLIP FUNCTIONS
+   PAGE FLIP FUNCTIONS + WRAP
 ----------------------------------------- */
 function showPage() {
     document.getElementById("comicImage").src = pages[currentPage];
@@ -148,18 +165,44 @@ function showPage() {
 }
 
 function nextPage() {
-    if (currentPage < pages.length - 1) {
-        currentPage++;
-        showPage();
-    }
+    currentPage++;
+    if (currentPage >= pages.length) currentPage = 0; // wrap
+    showPage();
 }
 
 function prevPage() {
-    if (currentPage > 0) {
-        currentPage--;
-        showPage();
-    }
+    currentPage--;
+    if (currentPage < 0) currentPage = pages.length - 1; // wrap
+    showPage();
 }
+
+/* -----------------------------------------
+   AUTO‑FLIP SYSTEM
+----------------------------------------- */
+let flipInterval = null;
+
+function startAutoFlip() {
+    if (flipInterval) clearInterval(flipInterval);
+
+    const sliderValue = document.getElementById("speedSlider").value;
+
+    // Slider max = STOP auto‑flip
+    if (sliderValue == 10) return;
+
+    // Convert slider to seconds:
+    // 1 → 8 sec
+    // 5 → 4 sec
+    // 10 → STOP
+    const seconds = 8 - ((sliderValue - 1) * (4 / 4));
+
+    flipInterval = setInterval(nextPage, seconds * 1000);
+}
+
+// Update speed when slider moves
+document.getElementById("speedSlider").addEventListener("input", startAutoFlip);
+
+// Start auto‑flip immediately
+startAutoFlip();
 
 // Initial load
 showPage();
