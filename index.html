@@ -2,119 +2,34 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>The French Revolution — American Style</title>
+<title>Comic Viewer</title>
 
 <style>
   body {
     margin: 0;
     background-color: black;
-    font-family: Arial, sans-serif;
     overflow: hidden;
   }
 
-  /* HUB SCREEN */
-  #hubScreen {
-    position: absolute;
-    inset: 0;
-    background-color: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .thumbnail {
-    width: 300px;
-    height: auto;
-    cursor: pointer;
-    border: 3px solid white;
-  }
-
-  /* VIEWER SCREEN */
-  #viewerScreen {
-    position: absolute;
-    inset: 0;
-    background-color: black;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-  }
-
   #comicImage {
+    position: absolute;
+    inset: 0;
+    margin: auto;
     max-width: 100%;
-    max-height: 80vh;
-    margin-top: 20px;
-  }
-
-  /* NAV ARROWS */
-  .navButton {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 48px;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  #prevBtn { left: 20px; }
-  #nextBtn { right: 20px; }
-
-  /* HOME BUTTON */
-  .homeButton {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    font-size: 40px;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  /* SLIDER */
-  #speedControl {
-    width: 300px;
-    margin-top: 10px;
-  }
-
-  #audioPlayer {
-    margin-top: 10px;
+    max-height: 100%;
   }
 </style>
 </head>
 <body>
 
-<!-- HUB SCREEN -->
-<div id="hubScreen">
-  <img src="chapter1/c1p1.png" class="thumbnail" onclick="openViewer()">
-</div>
-
-<!-- VIEWER SCREEN -->
-<div id="viewerScreen">
-  <img id="comicImage" src="">
-
-  <!-- Navigation -->
-  <div id="prevBtn" class="navButton" onclick="prevPage()">&#10094;</div>
-  <div id="nextBtn" class="navButton" onclick="nextPage()">&#10095;</div>
-
-  <!-- Back to Home -->
-  <div id="homeBtn" class="homeButton" onclick="goHome()">&#8592;</div>
-
-  <!-- Auto-flip speed slider -->
-  <input type="range" id="speedControl" min="1000" max="15000" value="5000" step="500"
-         oninput="updateSpeed()">
-
-  <!-- Audio Player -->
-  <audio id="audioPlayer" controls>
-    <source id="musicSource" src="">
-  </audio>
-</div>
+<img id="comicImage" src="">
 
 <script>
 /* ------------------------------
-   PAGE ORDER (FOLDER CORRECT)
+   PAGE ORDER (ONLY FLIPPING)
 --------------------------------*/
 var pages = [
-  // CHAPTER 1
+  // Chapter 1
   "chapter1/c1p1.png",
   "chapter1/c1p2.png",
   "chapter1/c1p3.png",
@@ -124,7 +39,7 @@ var pages = [
   "chapter1/c1p7.png",
   "chapter1/c1p8.png",
 
-  // CHAPTER 2
+  // Chapter 2
   "chapter2/c2p1.png",
   "chapter2/c2p2.png",
   "chapter2/c2p3.png",
@@ -136,119 +51,26 @@ var pages = [
 ];
 
 var page = 0;
-var autoFlipPaused = false;
-var flipSpeed = 5000;
-var autoFlipTimer = null;
 
 /* ------------------------------
-   MUSIC SETUP
---------------------------------*/
-var chapter1Music = "c1m1.mp3";
-var chapter2Music = "c2m1.mp3";
-
-var chapter2StartIndex = 8; // after 8 chapter 1 pages
-
-var audioElement = document.getElementById("audioPlayer");
-var musicSource = document.getElementById("musicSource");
-var currentMusic = null;
-
-/* ------------------------------
-   OPEN VIEWER
---------------------------------*/
-function openViewer() {
-  document.getElementById("hubScreen").style.display = "none";
-  document.getElementById("viewerScreen").style.display = "flex";
-  loadPage();
-  startAutoFlip();
-}
-
-/* ------------------------------
-   HOME BUTTON
---------------------------------*/
-function goHome() {
-  document.getElementById("viewerScreen").style.display = "none";
-  document.getElementById("hubScreen").style.display = "flex";
-  stopAutoFlip();
-}
-
-/* ------------------------------
-   PAGE LOADING
+   LOAD FIRST PAGE
 --------------------------------*/
 function loadPage() {
   document.getElementById("comicImage").src = pages[page];
-  updateMusicForPage();
 }
 
 /* ------------------------------
-   MUSIC SWITCHING (RESPECT PAUSE)
---------------------------------*/
-function updateMusicForPage() {
-  var desiredMusic = (page >= chapter2StartIndex) ? chapter2Music : chapter1Music;
-
-  if (desiredMusic !== currentMusic) {
-    currentMusic = desiredMusic;
-
-    // Was the user listening?
-    var wasPlaying = !audioElement.paused;
-
-    // Switch track
-    musicSource.src = currentMusic + "?v=" + Date.now();
-    audioElement.pause();
-    audioElement.load();
-
-    // Only auto-play if user was already listening
-    if (wasPlaying) {
-      audioElement.play().catch(e => console.log("Autoplay blocked."));
-    }
-  }
-}
-
-/* ------------------------------
-   NAVIGATION
---------------------------------*/
-function nextPage() {
-  if (page < pages.length - 1) {
-    page++;
-    loadPage();
-    pauseAutoFlip();
-  }
-}
-
-function prevPage() {
-  if (page > 0) {
-    page--;
-    loadPage();
-    pauseAutoFlip();
-  }
-}
-
-/* ------------------------------
-   AUTO-FLIP
+   AUTO-FLIP EVERY 5 SECONDS
 --------------------------------*/
 function startAutoFlip() {
-  autoFlipTimer = setInterval(function() {
-    if (!autoFlipPaused) {
-      nextPage();
-    }
-  }, flipSpeed);
-}
-
-function stopAutoFlip() {
-  clearInterval(autoFlipTimer);
-}
-
-function pauseAutoFlip() {
-  autoFlipPaused = true;
-  setTimeout(() => {
-    if (flipSpeed < 15000) autoFlipPaused = false;
+  setInterval(function() {
+    page = (page + 1) % pages.length;
+    loadPage();
   }, 5000);
 }
 
-function updateSpeed() {
-  flipSpeed = document.getElementById("speedControl").value;
-  stopAutoFlip();
-  startAutoFlip();
-}
+loadPage();
+startAutoFlip();
 </script>
 
 </body>
