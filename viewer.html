@@ -1,152 +1,168 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Comic Viewer</title>
+    <title>Comic Viewer</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            overflow: hidden;
+        }
 
-<style>
-  body {
-    margin: 0;
-    background-color: black;
-    overflow: hidden;
-  }
+        #comicImage {
+            width: 100vw;
+            height: 100vh;
+            object-fit: contain;
+            background-color: black;
+        }
 
-  #comicImage {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    max-width: 100%;
-    max-height: 100%;
-  }
+        .navButton {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 40px;
+            color: white;
+            background: rgba(0,0,0,0.4);
+            padding: 20px;
+            cursor: pointer;
+            user-select: none;
+            z-index: 9999;
+        }
 
-  /* Manual arrows */
-  .navButton {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 60px;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-  }
+        #prevBtn { left: 10px; }
+        #nextBtn { right: 10px; }
 
-  #prevBtn { left: 20px; }
-  #nextBtn { right: 20px; }
+        #backBtn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 20px;
+            cursor: pointer;
+            user-select: none;
+            z-index: 9999;
+        }
 
-  /* Speed slider */
-  #speedControl {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    width: 150px;
-  }
-
-  /* Back-to-home arrow */
-  #homeBtn {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    font-size: 50px;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-  }
-</style>
+        /* Music Player */
+        #musicPlayer {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 999999;
+            width: 200px;
+        }
+    </style>
 </head>
-
 <body>
 
-<img id="comicImage" src="">
+<!-- ⭐ MUSIC PLAYER (top-left) -->
+<audio id="musicPlayer" controls loop>
+    <source id="musicSource" src="music/c1m1.mp3" type="audio/mpeg">
+</audio>
 
-<!-- Manual arrows -->
-<div id="prevBtn" class="navButton" onclick="prevPage()">&#10094;</div>
-<div id="nextBtn" class="navButton" onclick="nextPage()">&#10095;</div>
+<!-- ⭐ BACK BUTTON -->
+<div id="backBtn" onclick="window.location.href='index.html'">⟵ Back</div>
 
-<!-- Back to home -->
-<div id="homeBtn" onclick="window.location.href='index.html'">&#8592;</div>
+<!-- ⭐ NAV BUTTONS -->
+<div id="prevBtn" class="navButton" onclick="prevPage()">⟵</div>
+<div id="nextBtn" class="navButton" onclick="nextPage()">⟶</div>
 
-<!-- Speed slider -->
-<input type="range" id="speedControl" min="1000" max="15000" value="5000" step="500" oninput="updateSpeed()">
+<!-- ⭐ COMIC IMAGE -->
+<img id="comicImage" src="capter1/c1p1.png">
 
 <script>
-/* ------------------------------
-   PAGE ORDER
---------------------------------*/
-var pages = [
-  "capter1/c1p1.png",
-  "capter1/c1p2.png",
-  "capter1/c1p3.png",
-  "capter1/c1p4.png",
-  "capter1/c1p5.png",
-  "capter1/c1p6.png",
-  "capter1/c1p7.png",
-  "capter1/c1p8.png",
+/* -----------------------------------------
+   PAGE LIST — CHAPTER 1 + CHAPTER 2
+----------------------------------------- */
+const pages = [
+    "capter1/c1p1.png",
+    "capter1/c1p2.png",
+    "capter1/c1p3.png",
+    "capter1/c1p4.png",
+    "capter1/c1p5.png",
+    "capter1/c1p6.png",
+    "capter1/c1p7.png",
+    "capter1/c1p8.png",
 
-  "chapter2/c2p1.png",
-  "chapter2/c2p2.png",
-  "chapter2/c2p3.png",
-  "chapter2/c2p4.png",
-  "chapter2/c2p5.png",
-  "chapter2/c2p6.png",
-  "chapter2/c2p7.png",
-  "chapter2/c2p8.png"
+    "chapter2/c2p1.png",
+    "chapter2/c2p2.png",
+    "chapter2/c2p3.png",
+    "chapter2/c2p4.png",
+    "chapter2/c2p5.png",
+    "chapter2/c2p6.png",
+    "chapter2/c2p7.png",
+    "chapter2/c2p8.png"
 ];
 
-var page = 0;
-var flipSpeed = 5000;
-var autoFlipTimer = null;
+let currentPage = 0;
 
-/* ------------------------------
-   LOAD PAGE
---------------------------------*/
-function loadPage() {
-  document.getElementById("comicImage").src = pages[page];
-}
+/* -----------------------------------------
+   MUSIC LOGIC
+----------------------------------------- */
+let currentChapter = 1;
+let userIsPlaying = false;
 
-/* ------------------------------
-   AUTO-FLIP
---------------------------------*/
-function startAutoFlip() {
-  stopAutoFlip();
-  autoFlipTimer = setInterval(function() {
-    if (flipSpeed < 15000) {
-      nextPage();
+const musicPlayer = document.getElementById("musicPlayer");
+const musicSource = document.getElementById("musicSource");
+
+// Track user play/pause actions
+musicPlayer.addEventListener("play", () => {
+    userIsPlaying = true;
+});
+
+musicPlayer.addEventListener("pause", () => {
+    userIsPlaying = false;
+});
+
+// Detect chapter based on page index
+function updateMusicForPage(pageIndex) {
+    let newChapter = (pageIndex < 8) ? 1 : 2;
+
+    if (newChapter !== currentChapter) {
+        currentChapter = newChapter;
+
+        // Switch tracks
+        if (currentChapter === 1) {
+            musicSource.src = "music/c1m1.mp3";
+        } else {
+            musicSource.src = "music/c2m1.mp3";
+        }
+
+        musicPlayer.load();
+
+        // Only resume if user was already listening
+        if (userIsPlaying) {
+            musicPlayer.play();
+        }
     }
-  }, flipSpeed);
 }
 
-function stopAutoFlip() {
-  if (autoFlipTimer) clearInterval(autoFlipTimer);
+/* -----------------------------------------
+   PAGE FLIP FUNCTIONS
+----------------------------------------- */
+function showPage() {
+    document.getElementById("comicImage").src = pages[currentPage];
+    updateMusicForPage(currentPage);
 }
 
-/* ------------------------------
-   MANUAL NAVIGATION
---------------------------------*/
 function nextPage() {
-  page = (page + 1) % pages.length;
-  loadPage();
-  startAutoFlip();
+    if (currentPage < pages.length - 1) {
+        currentPage++;
+        showPage();
+    }
 }
 
 function prevPage() {
-  page = (page - 1 + pages.length) % pages.length;
-  loadPage();
-  startAutoFlip();
+    if (currentPage > 0) {
+        currentPage--;
+        showPage();
+    }
 }
 
-/* ------------------------------
-   SPEED SLIDER
---------------------------------*/
-function updateSpeed() {
-  flipSpeed = document.getElementById("speedControl").value;
-  startAutoFlip();
-}
-
-/* ------------------------------
-   INIT
---------------------------------*/
-loadPage();
-startAutoFlip();
+// Initial load
+showPage();
 </script>
 
 </body>
