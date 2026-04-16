@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>5‑Card Draw Poker</title>
+<style>
+  body {
+    background: radial-gradient(#063, #042);
+    color: #fff;
+    font-family: "Segoe UI", sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { margin-bottom: 10px; }
+  .table { padding: 10px; }
+  .hand { margin: 20px 0; }
+  .card {
+    display: inline-block;
+    width: 60px;
+    height: 90px;
+    margin: 5px;
+    border-radius: 6px;
+    background: #133;
+    border: 1px solid #aaa;
+    line-height: 90px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .selected {
+    transform: translateY(-10px);
+    background: #224;
+  }
+  #buttons button {
+    margin: 10px;
+    padding: 10px 20px;
+    background: #0a5;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+  }
+  #buttons button:disabled {
+    background: #555;
+    cursor: default;
+  }
+  #result {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+  #computerArea {
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+  <h1>5‑Card Draw Poker</h1>
+
+  <div id="computerArea">
+    <h3>Computer</h3>
+    <div class="hand" id="computer"></div>
+  </div>
+
+  <div id="playerArea">
+    <h3>You</h3>
+    <div class="hand" id="player"></div>
+  </div>
+
+  <div id="buttons">
+    <button id="deal">Deal</button>
+    <button id="draw" disabled>Draw</button>
+    <button id="show" disabled>Show Down</button>
+  </div>
+
+  <div id="result"></div>
+
+<script>
+const suits = ['♠','♥','♦','♣'];
+const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+
+let deck = [];
+let player = [];
+let computer = [];
+
+const playerDiv = document.getElementById('player');
+const computerDiv = document.getElementById('computer');
+const resultDiv = document.getElementById('result');
+
+const dealBtn = document.getElementById('deal');
+const drawBtn = document.getElementById('draw');
+const showBtn = document.getElementById('show');
+
+function newDeck() {
+  deck = [];
+  for (let s of suits) {
+    for (let v of values) {
+      deck.push({s,v});
+    }
+  }
+}
+
+function shuffle() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+}
+
+function dealHand() {
+  newDeck(); shuffle();
+  player = deck.splice(0,5);
+  computer = deck.splice(0,5);
+  renderHand(playerDiv, player, true);
+  renderBacks(computerDiv);
+  resultDiv.textContent = '';
+
+  drawBtn.disabled = false;
+  showBtn.disabled = true;
+  dealBtn.disabled = true;
+}
+
+function renderHand(div, hand, selectable) {
+  div.innerHTML = '';
+  hand.forEach((card, idx) => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = `${card.v}${card.s}`;
+    if (selectable) {
+      el.onclick = () => el.classList.toggle('selected');
+    }
+    div.appendChild(el);
+  });
+}
+
+function renderBacks(div) {
+  div.innerHTML = '';
+  for (let i=0;i<5;i++){
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = '🂠';
+    div.appendChild(el);
+  }
+}
+
+function drawNew() {
+  const selected = [...playerDiv.getElementsByClassName('selected')];
+  selected.forEach(cardEl => {
+    const idx = [...playerDiv.children].indexOf(cardEl);
+    player[idx] = deck.pop();
+  });
+  renderHand(playerDiv, player, false);
+  drawBtn.disabled = true;
+  showBtn.disabled = false;
+}
+
+function showDown() {
+  renderHand(computerDiv, computer, false);
+  const playerRank = rankHand(player);
+  const compRank = rankHand(computer);
+  const winner = compareRank(playerRank, compRank);
+  let msg = '';
+
+  if (winner > 0) msg = 'You Win!';
+  else if (winner < 0) msg = 'Computer Wins!';
+  else msg = 'It\'s a Tie!';
+
+  resultDiv.innerHTML = `
+    You: ${playerRank.name}<br>
+    Computer: ${compRank.name}<br>
+    <span style="font-size:1.4em">${msg}</span>
+  `;
+  dealBtn.disabled = false;
+  drawBtn.disabled = true;
+  showBtn.disabled = true;
+}
+
+// ---- Poker Ranking Logic ----
+function rankHand(hand) {
+  const valuesMap = Object.fromEntries(values.map((v,i)=>[v,i]));
+  const sorted = [...hand].sort((a,b)=>valuesMap[a.v]-valuesMap[b.v]);
+  const counts = {};
+  for (let c of sorted) counts[c.v]=(counts[c.v]||0)+1;
+  const suitsArr = sorted.map(c=>c.s);
+  const valsArr = sorted.map(c=>valuesMap[c.v]);
+  const flush = suitsArr.every(s=>s===suitsArr[0]);
+  const straight = valsArr.every((v,i,a)=> i===0 || v===a[i-1]+1);
+  const groups = Object.values(counts).sort((a,b)=>b-a).join('');
+  let rankValue = 0, name = '';
+  if (straight && flush) { rankValue=8; name='Straight Flush'; }
+  else if (groups==='41') { rankValue=7; name='Four of a Kind'; }
+  else if (groups==='32') { rankValue=6; name='Full House'; }
+  else if (flush) { rankValue=5; name='Flush'; }
+  else if (straight) { rankValue=4; name='Straight'; }
+  else if (groups==='31') { rankValue=3; name='Three of a Kind'; }
+  else if (groups==='221') { rankValue=2; name='Two Pair'; }
+  else if (groups==='2111') { rankValue=1; name='One Pair'; }
+  else { rankValue=0; name='High Card'; }
+  return { rankValue, name, high: Math.max(...valsArr)};
+}
+
+function compareRank(a,b){
+  if (a.rankValue!==b.rankValue) return a.rankValue-b.rankValue;
+  if (a.high!==b.high) return a.high-b.high;
+  return 0;
+}
+
+// ---- Event Listeners ----
+dealBtn.onclick = dealHand;
+drawBtn.onclick = drawNew;
+showBtn.onclick = showDown;
+</script>
+</body>
+</html>
