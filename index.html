@@ -15,7 +15,7 @@
     align-items: center;
     height: 100vh;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 
   /* Fade overlay */
@@ -32,24 +32,24 @@
 
   /* Banner container (SMALL + CROPPED) */
   #bannerContainer {
-    width: 900px;      /* smaller width */
-    height: 120px;     /* smaller height */
+    width: 900px;
+    height: 120px;
     margin-top: 10px;
     position: relative;
     z-index: 1;
-    overflow: hidden;  /* removes black bars */
+    overflow: hidden;
     background: transparent;
-    border-radius: 10px; /* optional, looks cleaner */
+    border-radius: 10px;
   }
 
   #bannerImage {
     width: 100%;
     height: 100%;
-    object-fit: cover;       /* fills container without stretching */
-    object-position: center; /* centers the banner */
+    object-fit: cover;
+    object-position: center;
   }
 
-  /* Thumbnail button */
+  /* Thumbnail buttons */
   .thumbButton {
     height: 150px;
     cursor: pointer;
@@ -57,11 +57,20 @@
     border-radius: 10px;
     transition: transform 0.2s;
     z-index: 1;
-    margin-top: 40px;
+    margin: 20px;
   }
 
   .thumbButton:hover {
     transform: scale(1.1);
+  }
+
+  /* Thumbnail row */
+  #thumbRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    z-index: 1;
+    margin-top: 30px;
   }
 </style>
 </head>
@@ -73,9 +82,18 @@
   <img id="bannerImage" src="banner1.png">
 </div>
 
-<!-- Thumbnail button -->
-<img src="capter1/c1p1.png" class="thumbButton"
-     onclick="window.location.href='viewer.html'">
+<!-- Thumbnail Row -->
+<div id="thumbRow">
+
+  <!-- Comic Chapter 1 -->
+  <img src="capter1/c1p1.png" class="thumbButton"
+       onclick="window.location.href='viewer.html'">
+
+  <!-- Poker Game Thumbnail -->
+  <img src="cardgame.png" class="thumbButton"
+       onclick="window.location.href='game1.html'">
+
+</div>
 
 <script>
   const frames = ["banner1.png", "banner2.png", "banner3.png", "banner4.png"];
