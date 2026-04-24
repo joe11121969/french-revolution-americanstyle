@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>5‑Card Draw Poker</title>
+
 <style>
   body {
     background: radial-gradient(#063, #042);
@@ -12,10 +13,13 @@
     text-align: center;
     margin: 0;
     padding: 20px;
+    position: relative;
   }
+
   h1 { margin-bottom: 10px; }
   .table { padding: 10px; }
   .hand { margin: 20px 0; }
+
   .card {
     display: inline-block;
     width: 60px;
@@ -29,10 +33,12 @@
     cursor: pointer;
     transition: transform 0.2s;
   }
+
   .selected {
     transform: translateY(-10px);
     background: #224;
   }
+
   #buttons button {
     margin: 10px;
     padding: 10px 20px;
@@ -43,40 +49,69 @@
     color: #fff;
     cursor: pointer;
   }
+
   #buttons button:disabled {
     background: #555;
     cursor: default;
   }
+
   #result {
     margin-top: 20px;
     font-weight: bold;
     font-size: 1.2em;
   }
+
   #computerArea {
     opacity: 0.7;
   }
+
+  /* BACK BUTTON */
+  #backBtn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    font-size: 32px;
+    color: white;
+    background: rgba(0,0,0,0.4);
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    z-index: 9999;
+    transition: 0.2s;
+  }
+
+  #backBtn:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.1);
+  }
 </style>
 </head>
+
 <body>
-  <h1>5‑Card Draw Poker</h1>
 
-  <div id="computerArea">
-    <h3>Computer</h3>
-    <div class="hand" id="computer"></div>
-  </div>
+<!-- BACK BUTTON -->
+<div id="backBtn" onclick="window.location.href='index.html'">⬅</div>
 
-  <div id="playerArea">
-    <h3>You</h3>
-    <div class="hand" id="player"></div>
-  </div>
+<h1>5‑Card Draw Poker</h1>
 
-  <div id="buttons">
-    <button id="deal">Deal</button>
-    <button id="draw" disabled>Draw</button>
-    <button id="show" disabled>Show Down</button>
-  </div>
+<div id="computerArea">
+  <h3>Computer</h3>
+  <div class="hand" id="computer"></div>
+</div>
 
-  <div id="result"></div>
+<div id="playerArea">
+  <h3>You</h3>
+  <div class="hand" id="player"></div>
+</div>
+
+<div id="buttons">
+  <button id="deal">Deal</button>
+  <button id="draw" disabled>Draw</button>
+  <button id="show" disabled>Show Down</button>
+</div>
+
+<div id="result"></div>
 
 <script>
 const suits = ['♠','♥','♦','♣'];
@@ -213,5 +248,6 @@ dealBtn.onclick = dealHand;
 drawBtn.onclick = drawNew;
 showBtn.onclick = showDown;
 </script>
+
 </body>
 </html>
