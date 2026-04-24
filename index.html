@@ -29,27 +29,24 @@
     z-index: 0;
   }
 
-  /* Banner container (smaller + tighter) */
+  /* Banner container */
   #banner {
     position: absolute;
     top: 0;
     width: 100%;
-    height: 140px; /* smaller banner */
+    height: 150px; /* slightly larger for safety */
     overflow: hidden;
     z-index: 2;
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   .bannerImage {
     position: absolute;
     width: 100%;
-    height: 140px;
+    height: 150px;
     object-fit: cover;
-    object-position: center top; /* keeps text from shifting */
+    object-position: center top;
     opacity: 0;
-    transition: opacity 1.2s ease-in-out; /* smoother fade */
+    transition: opacity 1s ease-in-out;
   }
 
   .thumbButton {
