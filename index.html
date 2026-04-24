@@ -11,7 +11,7 @@
     background-size: cover;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* FIX: removes lower black bar */
+    justify-content: flex-start; /* keep everything at the top */
     align-items: center;
     height: 100vh;
     position: relative;
@@ -33,17 +33,19 @@
   /* Banner container */
   #bannerContainer {
     width: 1600px;
-    height: 200px;
+    height: 140px;       /* tightly cropped height */
     margin-top: 0;
     position: relative;
     z-index: 1;
-    background: transparent; /* FIX: removes upper black bar */
+    overflow: hidden;    /* removes black bars by cropping */
+    background: transparent;
   }
 
   #bannerImage {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;       /* fills the container */
+    object-position: center; /* centers the banner */
   }
 
   /* Thumbnail button */
