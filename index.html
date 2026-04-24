@@ -8,12 +8,25 @@
   body {
     margin: 0;
     background: url('background1.png') no-repeat center center fixed;
-background-size: cover;
-
+    background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Fade overlay */
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45); /* adjust opacity for stronger or lighter fade */
+    z-index: 0;
   }
 
   .thumbButton {
@@ -22,6 +35,7 @@ background-size: cover;
     border: 2px solid white;
     border-radius: 6px;
     transition: transform 0.2s;
+    z-index: 1; /* keeps the button above the fade layer */
   }
 
   .thumbButton:hover {
