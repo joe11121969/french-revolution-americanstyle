@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Game 3 – Endless Loop Duel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #111;
+      color: #f5e6c8;
+      font-family: "Trebuchet MS", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 1100px;
+      height: 700px;
+      margin-top: 10px;
+      background: #000;
+      border: 3px solid #7b5b2a;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+    }
+
+    /* Board background – uses ONLY gameboard2.png */
+    #board {
+      position: absolute;
+      inset: 0;
+      background-image: url("boardgameart/gameboard2.png");
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+    }
+
+    /* HP boxes (numbers only; hearts are in the art) */
+    .hp-box {
+      position: absolute;
+      width: 180px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 30px;
+      font-size: 26px;
+      font-weight: bold;
+      color: #3b1300;
+      text-shadow: 1px 1px 2px #f5e6c8;
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* Adjust these positions to line up with the hearts in gameboard2.png */
+    #elfHpBox {
+      top: 40px;
+      left: 60px;
+    }
+
+    #dwarfHpBox {
+      bottom: 60px;
+      right: 60px;
+    }
+
+    .glow {
+      box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.7);
+      border-radius: 14px;
+    }
+
+    /* Tokens – use ONLY elf token.png and dwarf token.png */
+    .token {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      z-index: 4;
+      transition: top 0.4s ease, left 0.4s ease;
+    }
+
+    #elfToken {
+      background-image: url("boardgameart/elf token.png");
+    }
+
+    #dwarfToken {
+      background-image: url("boardgameart/dwarf token.png");
+    }
+
+    /* Bottom text box (log + roll button) – sits in the empty area under START */
+    #bottom-panel {
+      position: absolute;
+      left: 60px;
+      right: 60px;
+      bottom: 20px;
+      height: 130px;
+      background: rgba(20, 10, 5, 0.9);
+      border: 2px solid #c9a46a;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 10px;
+      z-index: 5;
+    }
+
+    #log {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.3;
+      padding-right: 4px;
+    }
+
+    #log p {
+      margin-bottom: 2px;
+    }
+
+    #bottom-controls {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 4px;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1px solid #c9a46a;
+      background: #3b2613;
+      color: #f5e6c8;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      background: #5a3a1b;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn.disabled {
+      opacity: 0.4;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .btn-glow {
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.9);
+    }
+
+    /* Global bottom buttons (Return / Reset) */
+    #global-buttons {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    #global-buttons .btn {
+      pointer-events: auto;
+    }
+
+    /* Top scroll text area (instructions) – over the top parchment box */
+    #top-scroll {
+      position: absolute;
+      left: 160px;
+      right: 160px;
+      top: 40px;
+      height: 80px;
+      padding: 8px 12px;
+      font-size: 15px;
+      line-height: 1.3;
+      color: #2b1300;
+      text-shadow: 1px 1px 1px #f5e6c8;
+      z-index: 4;
+      overflow: hidden;
+    }
+
+    /* Intersection choice overlay */
+    #choice-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #choice-box {
+      background: #2b1a0c;
+      border: 2px solid #c9a46a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      width: 360px;
+      text-align: center;
+    }
+
+    #choice-box p {
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    #choice-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    /* Initial setup overlay */
+    #setup-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    #setup-box {
+      background: #2b1a0c;
+      border: 2px solid #c9a46a;
+      border-radius: 10px;
+      padding: 18px 22px;
+      width: 420px;
+      color: #f5e6c8;
+    }
+
+    #setup-box h2 {
+      margin-bottom: 10px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    #setup-box label {
+      display: block;
+      margin-top: 8px;
+      font-size: 14px;
+    }
+
+    #setup-box input[type="number"] {
+      width: 80px;
+      padding: 4px;
+      margin-top: 4px;
+      border-radius: 4px;
+      border: 1px solid #c9a46a;
+      background: #3b2613;
+      color: #f5e6c8;
+    }
+
+    #token-select {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .token-choice {
+      border: 2px solid #c9a46a;
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      background: #3b2613;
+      font-size: 14px;
+    }
+
+    .token-choice.selected {
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.9);
+      background: #5a3a1b;
+    }
+
+    #setup-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="board"></div>
+
+    <!-- HP boxes (numbers only; hearts are in the art) -->
+    <div id="elfHpBox" class="hp-box">
+      <span id="elfHpText"></span>
+    </div>
+    <div id="dwarfHpBox" class="hp-box">
+      <span id="dwarfHpText"></span>
+    </div>
+
+    <!-- Tokens -->
+    <div id="elfToken" class="token"></div>
+    <div id="dwarfToken" class="token"></div>
+
+    <!-- Top scroll text (instructions / narration) -->
+    <div id="top-scroll"></div>
+
+    <!-- Bottom log + roll button -->
+    <div id="bottom-panel">
+      <div id="log"></div>
+      <div id="bottom-controls">
+        <button id="rollBtn" class="btn disabled">Roll Dice</button>
+      </div>
+    </div>
+
+    <!-- Global bottom buttons -->
+    <div id="global-buttons">
+      <button id="hubBtn" class="btn">Return to Hub</button>
+      <button id="resetBtn" class="btn">Reset</button>
+    </div>
+
+    <!-- Intersection choice overlay -->
+    <div id="choice-overlay">
+      <div id="choice-box">
+        <p id="choice-text">Choose your path:</p>
+        <div id="choice-buttons">
+          <button id="choiceLeft" class="btn">Left Path</button>
+          <button id="choiceCenter" class="btn">Center Path</button>
+          <button id="choiceRight" class="btn">Right Path</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Initial setup overlay -->
+    <div id="setup-overlay">
+      <div id="setup-box">
+        <h2>Endless Loop Duel Setup</h2>
+        <label>Choose your token:</label>
+        <div id="token-select">
+          <div class="token-choice" data-token="elf">Elf Mage</div>
+          <div class="token-choice" data-token="dwarf">Dwarven Fighter</div>
+        </div>
+
+        <label for="playerHpInput">Your starting HP:</label>
+        <input id="playerHpInput" type="number" min="1" max="30" value="6" />
+
+        <label for="enemyHpInput">Opponent starting HP:</label>
+        <input id="enemyHpInput" type="number" min="1" max="30" value="8" />
+
+        <div id="setup-actions">
+          <button id="startGameBtn" class="btn">Start Game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Board model (simple loop + three branches)
+    // -----------------------------
+    // This is an approximate mapping to your board:
+    // 0: START bottom center
+    // 1: approach to fork
+    // 2-4: Arcane Grove branch
+    // 5-7: Rogue's Pass branch
+    // 8-10: Dwarven Tunnels branch
+    // 11-13: top path returning to START
+
+    const nodes = [
+      { id: 0, x: 50, y: 78, type: "start", next: [1] },
+
+      // fork area
+      { id: 1, x: 50, y: 70, type: "intersection", next: [2, 5, 8] },
+
+      // Arcane Grove branch (left)
+      { id: 2, x: 35, y: 65, type: "event", next: [3], area: "arcane" },
+      { id: 3, x: 25, y: 55, type: "battle", next: [4], area: "arcane" },
+      { id: 4, x: 30, y: 40, type: "normal", next: [11], area: "arcane" },
+
+      // Rogue's Pass branch (center)
+      { id: 5, x: 50, y: 60, type: "battle", next: [6], area: "rogue" },
+      { id: 6, x: 50, y: 48, type: "event", next: [7], area: "rogue" },
+      { id: 7, x: 50, y: 38, type: "battle", next: [11], area: "rogue" },
+
+      // Dwarven Tunnels branch (right)
+      { id: 8, x: 65, y: 65, type: "event", next: [9], area: "dwarf" },
+      { id: 9, x: 75, y: 55, type: "battle", next: [10], area: "dwarf" },
+      { id: 10, x: 70, y: 40, type: "normal", next: [11], area: "dwarf" },
+
+      // top path returning to start
+      { id: 11, x: 50, y: 30, type: "normal", next: [12] },
+      { id: 12, x: 50, y: 45, type: "normal", next: [13] },
+      { id: 13, x: 50, y: 60, type: "normal", next: [0] }
+    ];
+
+    function getNode(id) {
+      return nodes.find(n => n.id === id);
+    }
+
+    // -----------------------------
+    // Game state
+    // -----------------------------
+    let playerToken = "elf"; // "elf" or "dwarf"
+    let enemyToken = "dwarf";
+    let elfHP = 6;
+    let dwarfHP = 8;
+
+    let currentPlayer = "player"; // "player" or "enemy"
+    let playerPos = 0;
+    let enemyPos = 0;
+
+    let isRollingAllowed = false;
+    let isMoving = false;
+    let pendingSteps = 0;
+
+    // DOM references
+    const elfTokenEl = document.getElementById("elfToken");
+    const dwarfTokenEl = document.getElementById("dwarfToken");
+    const elfHpText = document.getElementById("elfHpText");
+    const dwarfHpText = document.getElementById("dwarfHpText");
+    const elfHpBox = document.getElementById("elfHpBox");
+    const dwarfHpBox = document.getElementById("dwarfHpBox");
+    const topScroll = document.getElementById("top-scroll");
+    const logEl = document.getElementById("log");
+    const rollBtn = document.getElementById("rollBtn");
+    const hubBtn = document.getElementById("hubBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    const choiceOverlay = document.getElementById("choice-overlay");
+    const choiceText = document.getElementById("choice-text");
+    const choiceLeft = document.getElementById("choiceLeft");
+    const choiceCenter = document.getElementById("choiceCenter");
+    const choiceRight = document.getElementById("choiceRight");
+
+    const setupOverlay = document.getElementById("setup-overlay");
+    const tokenChoices = document.querySelectorAll(".token-choice");
+    const playerHpInput = document.getElementById("playerHpInput");
+    const enemyHpInput = document.getElementById("enemyHpInput");
+    const startGameBtn = document.getElementById("startGameBtn");
+
+    // -----------------------------
+    // Utility
+    // -----------------------------
+    function log(message) {
+      const p = document.createElement("p");
+      p.textContent = message;
+      logEl.appendChild(p);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setTopScroll(text) {
+      topScroll.textContent = text;
+    }
+
+    function updateHpDisplay() {
+      elfHpText.textContent = elfHP;
+      dwarfHpText.textContent = dwarfHP;
+    }
+
+    function setTurnGlow() {
+      elfHpBox.classList.remove("glow");
+      dwarfHpBox.classList.remove("glow");
+      if (currentPlayer === "player") {
+        if (playerToken === "elf") {
+          elfHpBox.classList.add("glow");
+        } else {
+          dwarfHpBox.classList.add("glow");
+        }
+      } else {
+        if (enemyToken === "elf") {
+          elfHpBox.classList.add("glow");
+        } else {
+          dwarfHpBox.classList.add("glow");
+        }
+      }
+    }
+
+    function setRollEnabled(enabled) {
+      isRollingAllowed = enabled;
+      if (enabled) {
+        rollBtn.classList.remove("disabled");
+        rollBtn.classList.add("btn-glow");
+      } else {
+        rollBtn.classList.add("disabled");
+        rollBtn.classList.remove("btn-glow");
+      }
+    }
+
+    function placeToken(tokenEl, nodeId, offsetIndex) {
+      const node = getNode(nodeId);
+      if (!node) return;
+      const offset = offsetIndex === 0 ? -2 : 2;
+      tokenEl.style.left = `calc(${node.x}% + ${offset}px)`;
+      tokenEl.style.top = `calc(${node.y}% + ${offset}px)`;
+    }
+
+    function checkVictory() {
+      if (elfHP <= 0 || dwarfHP <= 0) {
+        setRollEnabled(false);
+        const winner =
+          elfHP <= 0 && dwarfHP <= 0
+            ? "No one"
+            : elfHP <= 0
+            ? "Dwarven Fighter"
+            : "Elf Mage";
+        setTopScroll(`${winner} wins the duel!`);
+        log(`=== ${winner} wins the duel! ===`);
+        return true;
+      }
+      return false;
+    }
+
+    // -----------------------------
+    // Movement + events
+    // -----------------------------
+    function rollDice() {
+      const d1 = Math.floor(Math.random() * 6) + 1;
+      const d2 = Math.floor(Math.random() * 6) + 1;
+      return { d1, d2, total: d1 + d2 };
+    }
+
+    function startTurn() {
+      if (checkVictory()) return;
+      setTurnGlow();
+      setRollEnabled(true);
+
+      const who =
+        currentPlayer === "player"
+          ? playerToken === "elf"
+            ? "Elf Mage"
+            : "Dwarven Fighter"
+          : enemyToken === "elf"
+          ? "Elf Mage"
+          : "Dwarven Fighter";
+
+      setTopScroll(`${who}'s turn. Roll the dice.`);
+    }
+
+    function handleRoll() {
+      if (!isRollingAllowed || isMoving) return;
+
+      setRollEnabled(false);
+      const { d1, d2, total } = rollDice();
+
+      const actorIsPlayer = currentPlayer === "player";
+      const actorToken = actorIsPlayer ? playerToken : enemyToken;
+      const actorName =
+        actorToken === "elf" ? "Elf Mage" : "Dwarven Fighter";
+
+      log(`${actorName} rolls ${d1} + ${d2} = ${total}`);
+      setTopScroll(`${actorName} moves ${total} spaces.`);
+
+      pendingSteps = total;
+      isMoving = true;
+      moveStep();
+    }
+
+    function moveStep() {
+      if (pendingSteps <= 0) {
+        isMoving = false;
+        resolveLanding();
+        return;
+      }
+
+      const actorIsPlayer = currentPlayer === "player";
+      const currentPos = actorIsPlayer ? playerPos : enemyPos;
+      const node = getNode(currentPos);
+
+      if (!node) {
+        isMoving = false;
+        resolveLanding();
+        return;
+      }
+
+      // Intersection handling
+      if (node.type === "intersection" && node.next.length > 1 && pendingSteps > 0) {
+        showPathChoice(node);
+        return;
+      }
+
+      // Normal move: choose first next
+      const nextId = node.next[0];
+      if (actorIsPlayer) {
+        playerPos = nextId;
+        placeToken(
+          playerToken === "elf" ? elfTokenEl : dwarfTokenEl,
+          playerPos,
+          playerToken === "elf" ? 0 : 1
+        );
+      } else {
+        enemyPos = nextId;
+        placeToken(
+          enemyToken === "elf" ? elfTokenEl : dwarfTokenEl,
+          enemyPos,
+          enemyToken === "elf" ? 0 : 1
+        );
+      }
+
+      pendingSteps--;
+      setTimeout(moveStep, 450);
+    }
+
+    function showPathChoice(node) {
+      choiceOverlay.style.display = "flex";
+      choiceText.textContent =
+        "You reached an intersection. Choose your path.";
+
+      // Left -> node.next[0] (Arcane Grove)
+      // Center -> node.next[1] (Rogue's Pass)
+      // Right -> node.next[2] (Dwarven Tunnels)
+
+      function choose(index) {
+        choiceOverlay.style.display = "none";
+        const nextId = node.next[index];
+        const actorIsPlayer = currentPlayer === "player";
+
+        if (actorIsPlayer) {
+          playerPos = nextId;
+          placeToken(
+            playerToken === "elf" ? elfTokenEl : dwarfTokenEl,
+            playerPos,
+            playerToken === "elf" ? 0 : 1
+          );
+        } else {
+          enemyPos = nextId;
+          placeToken(
+            enemyToken === "elf" ? elfTokenEl : dwarfTokenEl,
+            enemyPos,
+            enemyToken === "elf" ? 0 : 1
+          );
+        }
+
+        pendingSteps--;
+        setTimeout(moveStep, 450);
+      }
+
+      choiceLeft.onclick = () => choose(0);
+      choiceCenter.onclick = () => choose(1);
+      choiceRight.onclick = () => choose(2);
+    }
+
+    function resolveLanding() {
+      const actorIsPlayer = currentPlayer === "player";
+      const actorToken = actorIsPlayer ? playerToken : enemyToken;
+      const actorName =
+        actorToken === "elf" ? "Elf Mage" : "Dwarven Fighter";
+
+      const pos = actorIsPlayer ? playerPos : enemyPos;
+      const node = getNode(pos);
+      if (!node) {
+        endTurn();
+        return;
+      }
+
+      if (node.type === "event") {
+        resolveEvent(node, actorIsPlayer);
+      } else if (node.type === "battle") {
+        resolveBattle(node, actorIsPlayer);
+      } else {
+        endTurn();
+      }
+    }
+
+    function resolveEvent(node, actorIsPlayer) {
+      const actorToken = actorIsPlayer ? playerToken : enemyToken;
+      const actorName =
+        actorToken === "elf" ? "Elf Mage" : "Dwarven Fighter";
+
+      const roll = Math.floor(Math.random() * 4);
+      let text = "";
+      if (roll === 0) {
+        text = "Treasure! Gain +1 HP.";
+        if (actorToken === "elf") elfHP++;
+        else dwarfHP++;
+      } else if (roll === 1) {
+        text = "Trap! Lose 1 HP.";
+        if (actorToken === "elf") elfHP--;
+        else dwarfHP--;
+      } else if (roll === 2) {
+        text = "Magic Surge! Heal 2 HP.";
+        if (actorToken === "elf") elfHP += 2;
+        else dwarfHP += 2;
+      } else {
+        text = "Monster! Immediate dice battle.";
+        log(`${actorName} encounters a monster! Dice battle!`);
+        updateHpDisplay();
+        if (checkVictory()) return;
+        resolveBattle(node, actorIsPlayer, true);
+        return;
+      }
+
+      log(`Event: ${actorName} – ${text}`);
+      setTopScroll(`Event: ${text}`);
+      updateHpDisplay();
+      if (checkVictory()) return;
+      endTurn();
+    }
+
+    function resolveBattle(node, actorIsPlayer, fromEvent = false) {
+      const actorToken = actorIsPlayer ? playerToken : enemyToken;
+      const actorName =
+        actorToken === "elf" ? "Elf Mage" : "Dwarven Fighter";
+      const defenderToken = actorToken === "elf" ? "dwarf" : "elf";
+      const defenderName =
+        defenderToken === "elf" ? "Elf Mage" : "Dwarven Fighter";
+
+      const attackRoll = rollDice();
+      const defendRoll = rollDice();
+
+      log(
+        `Dice Battle! ${actorName} rolls ${attackRoll.total}, ${defenderName} rolls ${defendRoll.total}.`
+      );
+
+      if (attackRoll.total > defendRoll.total) {
+        log(`${actorName} wins the battle! ${defenderName} loses 1 HP.`);
+        if (defenderToken === "elf") elfHP--;
+        else dwarfHP--;
+      } else if (attackRoll.total < defendRoll.total) {
+        log(`${defenderName} wins the battle! ${actorName} loses 1 HP.`);
+        if (actorToken === "elf") elfHP--;
+        else dwarfHP--;
+      } else {
+        log("The battle is a tie. No damage dealt.");
+      }
+
+      updateHpDisplay();
+      if (checkVictory()) return;
+
+      if (!fromEvent) {
+        setTopScroll("Dice battle resolved.");
+      }
+      endTurn();
+    }
+
+    function endTurn() {
+      if (checkVictory()) return;
+      currentPlayer = currentPlayer === "player" ? "enemy" : "player";
+      startTurn();
+    }
+
+    // -----------------------------
+    // Setup + reset
+    // -----------------------------
+    function resetGame(fullReset = true) {
+      playerPos = 0;
+      enemyPos = 0;
+
+      placeToken(elfTokenEl, 0, 0);
+      placeToken(dwarfTokenEl, 0, 1);
+
+      if (fullReset) {
+        elfHP = 6;
+        dwarfHP = 8;
+      }
+
+      updateHpDisplay();
+      logEl.innerHTML = "";
+      setTopScroll("Welcome to Endless Loop Duel.");
+      currentPlayer = "player";
+      setTurnGlow();
+      setRollEnabled(false);
+    }
+
+    function applySetup() {
+      const chosen = document.querySelector(".token-choice.selected");
+      if (!chosen) {
+        alert("Choose a token first.");
+        return;
+      }
+
+      playerToken = chosen.dataset.token;
+      enemyToken = playerToken === "elf" ? "dwarf" : "elf";
+
+      const pHp = parseInt(playerHpInput.value, 10) || 6;
+      const eHp = parseInt(enemyHpInput.value, 10) || 8;
+
+      if (playerToken === "elf") {
+        elfHP = pHp;
+        dwarfHP = eHp;
+      } else {
+        dwarfHP = pHp;
+        elfHP = eHp;
+      }
+
+      updateHpDisplay();
+      resetGame(false);
+
+      log(
+        `You are playing as ${
+          playerToken === "elf" ? "Elf Mage" : "Dwarven Fighter"
+        } (${pHp} HP).`
+      );
+      log(
+        `Your opponent is ${
+          enemyToken === "elf" ? "Elf Mage" : "Dwarven Fighter"
+        } (${eHp} HP).`
+      );
+
+      setupOverlay.style.display = "none";
+      startTurn();
+    }
+
+    // -----------------------------
+    // Event listeners
+    // -----------------------------
+    rollBtn.addEventListener("click", handleRoll);
+
+    hubBtn.addEventListener("click", () => {
+      // Change this to your actual hub page if needed
+      window.location.href = "index.html";
+    });
+
+    resetBtn.addEventListener("click", () => {
+      window.location.reload();
+    });
+
+    tokenChoices.forEach(choice => {
+      choice.addEventListener("click", () => {
+        tokenChoices.forEach(c => c.classList.remove("selected"));
+        choice.classList.add("selected");
+      });
+    });
+
+    startGameBtn.addEventListener("click", applySetup);
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    window.addEventListener("load", () => {
+      resetGame();
+      setTopScroll("Choose your token and starting HP to begin.");
+    });
+  </script>
+</body>
+</html>
