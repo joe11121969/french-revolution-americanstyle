@@ -72,7 +72,7 @@
 
     /* FIXED STATUS AREA */
     #statusBox {
-        height: 160px;
+        height: 180px;
         background: rgba(0, 0, 0, 0.35);
         padding: 10px;
         border-radius: 8px;
@@ -141,22 +141,6 @@ function setText(msg) {
     document.getElementById("turnText").innerHTML = msg;
 }
 
-function declareWinner() {
-    if (playerHP <= 0 && outlawHP > 0) {
-        setText(`<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>`);
-        return true;
-    }
-    if (outlawHP <= 0 && playerHP > 0) {
-        setText(`<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>`);
-        return true;
-    }
-    if (playerHP <= 0 && outlawHP <= 0) {
-        setText(`<strong>Both duelists fall — it's a draw!</strong>`);
-        return true;
-    }
-    return false;
-}
-
 function playRound() {
 
     if (playerHP <= 0 || outlawHP <= 0) return;
@@ -169,19 +153,28 @@ function playRound() {
 
     if (p > o) {
         outlawHP -= 1;
-        text += `<span style='color:#6f3;'>You hit the outlaw! -1 HP</span>`;
+        text += `<span style='color:#6f3;'>You hit the outlaw! -1 HP</span><br>`;
     } else if (o > p) {
         playerHP -= 1;
-        text += `<span style='color:#f66;'>The outlaw hits you! -1 HP</span>`;
+        text += `<span style='color:#f66;'>The outlaw hits you! -1 HP</span><br>`;
     } else {
-        text += `<em>Both shots miss!</em>`;
+        text += `<em>Both shots miss!</em><br>`;
+    }
+
+    updateHP();
+
+    // Winner check — AND keep last roll text
+    if (playerHP <= 0 || outlawHP <= 0) {
+        if (playerHP <= 0 && outlawHP > 0) {
+            text += `<br><span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>`;
+        } else if (outlawHP <= 0 && playerHP > 0) {
+            text += `<br><span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>`;
+        } else {
+            text += `<br><strong>Both duelists fall — it's a draw!</strong>`;
+        }
     }
 
     setText(text);
-    updateHP();
-
-    // IMMEDIATE WIN CHECK — NO FINAL ROLL
-    declareWinner();
 }
 
 /* NEW ROUND RESET */
