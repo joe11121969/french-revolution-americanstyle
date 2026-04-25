@@ -146,7 +146,8 @@ function shuffle() {
 }
 
 function dealHand() {
-  newDeck(); shuffle();
+  newDeck(); 
+  shuffle();
   player = deck.splice(0,5);
   computer = deck.splice(0,5);
   renderHand(playerDiv, player, true);
@@ -173,7 +174,7 @@ function renderHand(div, hand, selectable) {
 
 function renderBacks(div) {
   div.innerHTML = '';
-  for (let i=0;i<5;i++){
+  for (let i = 0; i < 5; i++) {
     const el = document.createElement('div');
     el.className = 'card';
     el.textContent = '🂠';
@@ -213,7 +214,7 @@ function showDown() {
   showBtn.disabled = true;
 }
 
-// ---- FIXED POKER RANKING LOGIC ----
+// ---- POKER RANKING LOGIC (FIXED) ----
 function rankHand(hand) {
   const valuesMap = Object.fromEntries(values.map((v,i)=>[v,i]));
   const sorted = [...hand].sort((a,b)=>valuesMap[a.v]-valuesMap[b.v]);
@@ -227,8 +228,18 @@ function rankHand(hand) {
   const flush = suitsArr.every(s => s === suitsArr[0]);
   const straight = valsArr.every((v,i,a) => i === 0 || v === a[i-1] + 1);
 
-  // FIX: normalized group string
+  // normalize group pattern (e.g. "31", "32", "221", etc.)
   const groups = Object.values(counts).sort((a,b) => b - a).join('');
+
+  // groupRank = rank of the repeated card (pair/trips/quads) for tie-breaking
+  let groupRank = -1;
+  for (let v in counts) {
+    if (counts[v] > 1) {
+      // because cards are sorted low→high, the last repeated rank we see
+      // will be the highest repeated rank (good for two pair as well)
+      groupRank = valuesMap[v];
+    }
+  }
 
   let rankValue = 0, name = '';
 
@@ -242,12 +253,24 @@ function rankHand(hand) {
   else if (groups === '2111') { rankValue = 1; name = 'One Pair'; }
   else { rankValue = 0; name = 'High Card'; }
 
-  return { rankValue, name, high: Math.max(...valsArr) };
+  return { 
+    rankValue, 
+    name, 
+    high: Math.max(...valsArr),
+    groupRank
+  };
 }
 
-function compareRank(a,b){
-  if (a.rankValue!==b.rankValue) return a.rankValue-b.rankValue;
-  if (a.high!==b.high) return a.high-b.high;
+function compareRank(a, b) {
+  // compare hand category first (pair vs three of a kind, etc.)
+  if (a.rankValue !== b.rankValue) return a.rankValue - b.rankValue;
+
+  // then compare the repeated rank (e.g. pair of Q vs pair of 7)
+  if (a.groupRank !== b.groupRank) return a.groupRank - b.groupRank;
+
+  // fallback: highest card in the hand
+  if (a.high !== b.high) return a.high - b.high;
+
   return 0;
 }
 
