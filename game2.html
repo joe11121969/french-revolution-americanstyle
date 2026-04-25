@@ -9,7 +9,7 @@
     body {
         margin: 0;
         padding: 0;
-        background: url('cartable.png') no-repeat center center fixed;
+        background: url('cardgameart/cartable.png') no-repeat center center fixed;
         background-size: cover;
         font-family: Georgia, serif;
         color: #fff;
@@ -29,11 +29,12 @@
         z-index: 20;
     }
 
+    /* Centered UI on table */
     #gameContainer {
         position: absolute;
-        bottom: 12%;
+        top: 50%;
         left: 50%;
-        transform: translateX(-50%);
+        transform: translate(-50%, -50%);
         width: 600px;
         background: rgba(0, 0, 0, 0.55);
         padding: 20px;
@@ -50,7 +51,7 @@
     }
 
     #log {
-        height: 260px;
+        height: 220px;
         overflow-y: auto;
         background: rgba(0, 0, 0, 0.35);
         padding: 10px;
