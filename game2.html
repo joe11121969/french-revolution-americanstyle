@@ -17,15 +17,36 @@
         overflow: hidden;
     }
 
+    /* CLEARER BACK ARROW */
     #backArrow {
         position: absolute;
         bottom: 20px;
         left: 20px;
-        font-size: 40px;
+        font-size: 48px;
         cursor: pointer;
-        color: #fff;
-        text-shadow: 2px 2px 4px black;
+        color: #ffffff;
+        text-shadow: 3px 3px 6px black, 0 0 10px #fff;
         z-index: 20;
+        font-weight: bold;
+    }
+
+    /* NEW ROUND BUTTON */
+    #resetButton {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        font-size: 20px;
+        padding: 10px 20px;
+        background: #004d00;
+        color: white;
+        border: 2px solid #002800;
+        border-radius: 6px;
+        cursor: pointer;
+        text-shadow: 1px 1px 2px black;
+    }
+
+    #resetButton:hover {
+        background: #007000;
     }
 
     /* Centered UI */
@@ -88,6 +109,9 @@
 <body>
 
 <div id="backArrow" onclick="window.location.href='index.html'">&#8592;</div>
+
+<!-- NEW ROUND BUTTON -->
+<div id="resetButton" onclick="resetGame()">New Round</div>
 
 <div id="gameContainer">
     <h1>Duel at Sundown</h1>
@@ -169,6 +193,14 @@ function finalRoll() {
     }
 
     setText(text);
+}
+
+/* NEW ROUND RESET */
+function resetGame() {
+    playerHP = 3;
+    outlawHP = 3;
+    updateHP();
+    setText("New round started. Click Roll Dice.");
 }
 </script>
 
