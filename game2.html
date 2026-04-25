@@ -17,7 +17,6 @@
         overflow: hidden;
     }
 
-    /* Back Arrow */
     #backArrow {
         position: absolute;
         bottom: 20px;
@@ -29,7 +28,7 @@
         z-index: 20;
     }
 
-    /* Centered UI on table */
+    /* Centered UI */
     #gameContainer {
         position: absolute;
         top: 50%;
@@ -50,15 +49,22 @@
         text-shadow: 2px 2px 4px black;
     }
 
-    #log {
-        height: 220px;
-        overflow-y: auto;
+    /* FIXED STATUS AREA */
+    #statusBox {
+        height: 160px;
         background: rgba(0, 0, 0, 0.35);
         padding: 10px;
         border-radius: 8px;
-        text-align: left;
-        font-size: 18px;
+        font-size: 20px;
         line-height: 1.4;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    #hpLine {
+        font-size: 22px;
+        margin-bottom: 10px;
     }
 
     button {
@@ -86,7 +92,10 @@
 <div id="gameContainer">
     <h1>Duel at Sundown</h1>
 
-    <div id="log"></div>
+    <div id="statusBox">
+        <div id="hpLine"><strong>HP:</strong> You 3 | Outlaw 3</div>
+        <div id="turnText">Click Roll Dice to begin.</div>
+    </div>
 
     <button onclick="playRound()">Roll Dice</button>
 </div>
@@ -99,37 +108,38 @@ function rollDie() {
     return Math.floor(Math.random() * 6) + 1;
 }
 
-function log(msg) {
-    const logBox = document.getElementById("log");
-    logBox.innerHTML += msg + "<br>";
-    logBox.scrollTop = logBox.scrollHeight;
+function updateHP() {
+    document.getElementById("hpLine").innerHTML =
+        `<strong>HP:</strong> You ${playerHP} | Outlaw ${outlawHP}`;
+}
+
+function setText(msg) {
+    document.getElementById("turnText").innerHTML = msg;
 }
 
 function playRound() {
 
-    // Stop if duel already ended
     if (playerHP <= 0 || outlawHP <= 0) return;
 
-    const playerRoll = rollDie();
-    const outlawRoll = rollDie();
+    const p = rollDie();
+    const o = rollDie();
 
-    log(`<strong>You rolled:</strong> ${playerRoll}`);
-    log(`<strong>Outlaw rolled:</strong> ${outlawRoll}`);
+    let text = `<strong>You rolled:</strong> ${p}<br>
+                <strong>Outlaw rolled:</strong> ${o}<br>`;
 
-    if (playerRoll > outlawRoll) {
+    if (p > o) {
         outlawHP -= 1;
-        log(`<span style='color:#6f3;'>You hit the outlaw! -1 HP</span>`);
-    } else if (outlawRoll > playerRoll) {
+        text += `<span style='color:#6f3;'>You hit the outlaw! -1 HP</span>`;
+    } else if (o > p) {
         playerHP -= 1;
-        log(`<span style='color:#f66;'>The outlaw hits you! -1 HP</span>`);
+        text += `<span style='color:#f66;'>The outlaw hits you! -1 HP</span>`;
     } else {
-        log("<em>Both shots miss!</em>");
+        text += `<em>Both shots miss!</em>`;
     }
 
-    log(`<strong>HP:</strong> You ${playerHP} | Outlaw ${outlawHP}`);
-    log("<hr>");
+    setText(text);
+    updateHP();
 
-    // Check for duel end
     if (playerHP <= 0 || outlawHP <= 0) {
         finalRoll();
     }
@@ -137,28 +147,28 @@ function playRound() {
 
 function finalRoll() {
 
-    log("<strong>FINAL ROLL TO DECIDE THE DUEL!</strong>");
+    const p = rollDie();
+    const o = rollDie();
 
-    const playerFinal = rollDie();
-    const outlawFinal = rollDie();
+    let text = `<strong>FINAL ROLL!</strong><br>
+                You rolled <strong>${p}</strong><br>
+                Outlaw rolled <strong>${o}</strong><br><br>`;
 
-    log(`You rolled <strong>${playerFinal}</strong>`);
-    log(`Outlaw rolled <strong>${outlawFinal}</strong>`);
-
-    if (playerFinal > outlawFinal) {
-        log("<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>");
-    } else if (outlawFinal > playerFinal) {
-        log("<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>");
+    if (p > o) {
+        text += `<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>`;
+    } else if (o > p) {
+        text += `<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>`;
     } else {
-        // Tie breaker by remaining HP
         if (playerHP > outlawHP) {
-            log("<strong>It's a tie, but you had more HP — YOU WIN!</strong>");
+            text += `<strong>It's a tie, but you had more HP — YOU WIN!</strong>`;
         } else if (outlawHP > playerHP) {
-            log("<strong>It's a tie, but the outlaw had more HP — YOU LOSE!</strong>");
+            text += `<strong>It's a tie, but the outlaw had more HP — YOU LOSE!</strong>`;
         } else {
-            log("<strong>Perfect tie — it's a draw!</strong>");
+            text += `<strong>Perfect tie — it's a draw!</strong>`;
         }
     }
+
+    setText(text);
 }
 </script>
 
