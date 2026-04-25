@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Game 3 – Endless Loop Duel</title>
+  <title>Endless Loop Duel – Game 3</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,8 +24,8 @@
 
     #game-container {
       position: relative;
-      width: 1100px;
-      height: 700px;
+      width: 1000px;
+      height: 600px;
       margin-top: 10px;
       background: #000;
       border: 3px solid #7b5b2a;
@@ -33,12 +33,13 @@
       overflow: hidden;
     }
 
-    /* Board background – uses ONLY gameboard2.png */
+    /* Board background – scaled correctly, no stretching */
     #board {
       position: absolute;
       inset: 0;
       background-image: url("boardgameart/gameboard2.png");
-      background-size: cover;
+      background-size: contain;
+      background-repeat: no-repeat;
       background-position: center;
       z-index: 1;
     }
@@ -46,13 +47,13 @@
     /* HP boxes (numbers only; hearts are in the art) */
     .hp-box {
       position: absolute;
-      width: 180px;
-      height: 60px;
+      width: 140px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      padding-right: 30px;
-      font-size: 26px;
+      padding-right: 10px;
+      font-size: 22px;
       font-weight: bold;
       color: #3b1300;
       text-shadow: 1px 1px 2px #f5e6c8;
@@ -60,32 +61,32 @@
       pointer-events: none;
     }
 
-    /* Adjust these positions to line up with the hearts in gameboard2.png */
+    /* Adjusted to sit over the printed hearts on gameboard2 */
     #elfHpBox {
       top: 40px;
-      left: 60px;
+      left: 80px;
     }
 
     #dwarfHpBox {
       bottom: 60px;
-      right: 60px;
+      right: 80px;
     }
 
     .glow {
-      box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.7);
-      border-radius: 14px;
+      box-shadow: 0 0 16px 6px rgba(255, 215, 0, 0.7);
+      border-radius: 12px;
     }
 
-    /* Tokens – use ONLY elf token.png and dwarf token.png */
+    /* Tokens */
     .token {
       position: absolute;
-      width: 70px;
-      height: 70px;
+      width: 60px;
+      height: 60px;
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
       z-index: 4;
-      transition: top 0.4s ease, left 0.4s ease;
+      transition: top 0.35s ease, left 0.35s ease;
     }
 
     #elfToken {
@@ -96,13 +97,29 @@
       background-image: url("boardgameart/dwarf token.png");
     }
 
-    /* Bottom text box (log + roll button) – sits in the empty area under START */
+    /* Top scroll text area (instructions) – over the parchment at top */
+    #top-scroll {
+      position: absolute;
+      left: 180px;
+      right: 180px;
+      top: 40px;
+      height: 80px;
+      padding: 8px 12px;
+      font-size: 15px;
+      line-height: 1.3;
+      color: #2b1300;
+      text-shadow: 1px 1px 1px #f5e6c8;
+      z-index: 4;
+      overflow: hidden;
+    }
+
+    /* Bottom text box (log + roll button) – in the empty area under START */
     #bottom-panel {
       position: absolute;
-      left: 60px;
-      right: 60px;
+      left: 80px;
+      right: 80px;
       bottom: 20px;
-      height: 130px;
+      height: 120px;
       background: rgba(20, 10, 5, 0.9);
       border: 2px solid #c9a46a;
       border-radius: 10px;
@@ -115,7 +132,7 @@
     #log {
       flex: 1;
       overflow-y: auto;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.3;
       padding-right: 4px;
     }
@@ -178,22 +195,6 @@
       pointer-events: auto;
     }
 
-    /* Top scroll text area (instructions) – over the top parchment box */
-    #top-scroll {
-      position: absolute;
-      left: 160px;
-      right: 160px;
-      top: 40px;
-      height: 80px;
-      padding: 8px 12px;
-      font-size: 15px;
-      line-height: 1.3;
-      color: #2b1300;
-      text-shadow: 1px 1px 1px #f5e6c8;
-      z-index: 4;
-      overflow: hidden;
-    }
-
     /* Intersection choice overlay */
     #choice-overlay {
       position: absolute;
@@ -212,6 +213,7 @@
       padding: 16px 20px;
       width: 360px;
       text-align: center;
+      color: #f5e6c8;
     }
 
     #choice-box p {
@@ -300,7 +302,7 @@
   <div id="game-container">
     <div id="board"></div>
 
-    <!-- HP boxes (numbers only; hearts are in the art) -->
+    <!-- HP boxes -->
     <div id="elfHpBox" class="hp-box">
       <span id="elfHpText"></span>
     </div>
@@ -312,7 +314,7 @@
     <div id="elfToken" class="token"></div>
     <div id="dwarfToken" class="token"></div>
 
-    <!-- Top scroll text (instructions / narration) -->
+    <!-- Top scroll text -->
     <div id="top-scroll"></div>
 
     <!-- Bottom log + roll button -->
@@ -332,11 +334,11 @@
     <!-- Intersection choice overlay -->
     <div id="choice-overlay">
       <div id="choice-box">
-        <p id="choice-text">Choose your path:</p>
+        <p id="choice-text">You reached a fork in the road. Choose your path.</p>
         <div id="choice-buttons">
-          <button id="choiceLeft" class="btn">Left Path</button>
-          <button id="choiceCenter" class="btn">Center Path</button>
-          <button id="choiceRight" class="btn">Right Path</button>
+          <button id="choiceLeft" class="btn">Arcane Grove</button>
+          <button id="choiceCenter" class="btn">Rogue's Pass</button>
+          <button id="choiceRight" class="btn">Dwarven Tunnels</button>
         </div>
       </div>
     </div>
@@ -366,26 +368,26 @@
 
   <script>
     // -----------------------------
-    // Board model (simple loop + three branches)
+    // Board model – approximate mapping to visible path
     // -----------------------------
-    // This is an approximate mapping to your board:
-    // 0: START bottom center
+    // Coordinates are in percentages of the game-container.
+    // 0: START (bottom center)
     // 1: approach to fork
-    // 2-4: Arcane Grove branch
-    // 5-7: Rogue's Pass branch
-    // 8-10: Dwarven Tunnels branch
+    // 2-4: Arcane Grove branch (left)
+    // 5-7: Rogue's Pass branch (center)
+    // 8-10: Dwarven Tunnels branch (right)
     // 11-13: top path returning to START
 
     const nodes = [
       { id: 0, x: 50, y: 78, type: "start", next: [1] },
 
       // fork area
-      { id: 1, x: 50, y: 70, type: "intersection", next: [2, 5, 8] },
+      { id: 1, x: 50, y: 68, type: "intersection", next: [2, 5, 8] },
 
       // Arcane Grove branch (left)
-      { id: 2, x: 35, y: 65, type: "event", next: [3], area: "arcane" },
-      { id: 3, x: 25, y: 55, type: "battle", next: [4], area: "arcane" },
-      { id: 4, x: 30, y: 40, type: "normal", next: [11], area: "arcane" },
+      { id: 2, x: 38, y: 62, type: "event", next: [3], area: "arcane" },
+      { id: 3, x: 30, y: 52, type: "battle", next: [4], area: "arcane" },
+      { id: 4, x: 36, y: 40, type: "normal", next: [11], area: "arcane" },
 
       // Rogue's Pass branch (center)
       { id: 5, x: 50, y: 60, type: "battle", next: [6], area: "rogue" },
@@ -393,9 +395,9 @@
       { id: 7, x: 50, y: 38, type: "battle", next: [11], area: "rogue" },
 
       // Dwarven Tunnels branch (right)
-      { id: 8, x: 65, y: 65, type: "event", next: [9], area: "dwarf" },
-      { id: 9, x: 75, y: 55, type: "battle", next: [10], area: "dwarf" },
-      { id: 10, x: 70, y: 40, type: "normal", next: [11], area: "dwarf" },
+      { id: 8, x: 62, y: 62, type: "event", next: [9], area: "dwarf" },
+      { id: 9, x: 70, y: 52, type: "battle", next: [10], area: "dwarf" },
+      { id: 10, x: 64, y: 40, type: "normal", next: [11], area: "dwarf" },
 
       // top path returning to start
       { id: 11, x: 50, y: 30, type: "normal", next: [12] },
@@ -496,12 +498,37 @@
       }
     }
 
-    function placeToken(tokenEl, nodeId, offsetIndex) {
-      const node = getNode(nodeId);
-      if (!node) return;
-      const offset = offsetIndex === 0 ? -2 : 2;
-      tokenEl.style.left = `calc(${node.x}% + ${offset}px)`;
-      tokenEl.style.top = `calc(${node.y}% + ${offset}px)`;
+    // place token with center/offset logic
+    function placeTokens() {
+      const playerNode = getNode(playerPos);
+      const enemyNode = getNode(enemyPos);
+      if (!playerNode || !enemyNode) return;
+
+      // same space → offset left/right
+      if (playerPos === enemyPos) {
+        const offset = 10;
+        const baseX = playerNode.x;
+        const baseY = playerNode.y;
+
+        const playerEl = playerToken === "elf" ? elfTokenEl : dwarfTokenEl;
+        const enemyEl = enemyToken === "elf" ? elfTokenEl : dwarfTokenEl;
+
+        playerEl.style.left = `calc(${baseX}% - ${offset}px)`;
+        playerEl.style.top = `calc(${baseY}% - 0px)`;
+
+        enemyEl.style.left = `calc(${baseX}% + ${offset}px)`;
+        enemyEl.style.top = `calc(${baseY}% - 0px)`;
+      } else {
+        // separate spaces → each centered
+        const playerEl = playerToken === "elf" ? elfTokenEl : dwarfTokenEl;
+        const enemyEl = enemyToken === "elf" ? elfTokenEl : dwarfTokenEl;
+
+        playerEl.style.left = `calc(${playerNode.x}% - 0px)`;
+        playerEl.style.top = `calc(${playerNode.y}% - 0px)`;
+
+        enemyEl.style.left = `calc(${enemyNode.x}% - 0px)`;
+        enemyEl.style.top = `calc(${enemyNode.y}% - 0px)`;
+      }
     }
 
     function checkVictory() {
@@ -592,32 +619,19 @@
       const nextId = node.next[0];
       if (actorIsPlayer) {
         playerPos = nextId;
-        placeToken(
-          playerToken === "elf" ? elfTokenEl : dwarfTokenEl,
-          playerPos,
-          playerToken === "elf" ? 0 : 1
-        );
       } else {
         enemyPos = nextId;
-        placeToken(
-          enemyToken === "elf" ? elfTokenEl : dwarfTokenEl,
-          enemyPos,
-          enemyToken === "elf" ? 0 : 1
-        );
       }
 
+      placeTokens();
       pendingSteps--;
-      setTimeout(moveStep, 450);
+      setTimeout(moveStep, 400);
     }
 
     function showPathChoice(node) {
       choiceOverlay.style.display = "flex";
       choiceText.textContent =
-        "You reached an intersection. Choose your path.";
-
-      // Left -> node.next[0] (Arcane Grove)
-      // Center -> node.next[1] (Rogue's Pass)
-      // Right -> node.next[2] (Dwarven Tunnels)
+        "You reached a fork in the road. Choose your path.";
 
       function choose(index) {
         choiceOverlay.style.display = "none";
@@ -626,22 +640,13 @@
 
         if (actorIsPlayer) {
           playerPos = nextId;
-          placeToken(
-            playerToken === "elf" ? elfTokenEl : dwarfTokenEl,
-            playerPos,
-            playerToken === "elf" ? 0 : 1
-          );
         } else {
           enemyPos = nextId;
-          placeToken(
-            enemyToken === "elf" ? elfTokenEl : dwarfTokenEl,
-            enemyPos,
-            enemyToken === "elf" ? 0 : 1
-          );
         }
 
+        placeTokens();
         pendingSteps--;
-        setTimeout(moveStep, 450);
+        setTimeout(moveStep, 400);
       }
 
       choiceLeft.onclick = () => choose(0);
@@ -667,6 +672,7 @@
       } else if (node.type === "battle") {
         resolveBattle(node, actorIsPlayer);
       } else {
+        setTopScroll(`${actorName} advances along the path.`);
         endTurn();
       }
     }
@@ -755,9 +761,6 @@
       playerPos = 0;
       enemyPos = 0;
 
-      placeToken(elfTokenEl, 0, 0);
-      placeToken(dwarfTokenEl, 0, 1);
-
       if (fullReset) {
         elfHP = 6;
         dwarfHP = 8;
@@ -769,6 +772,7 @@
       currentPlayer = "player";
       setTurnGlow();
       setRollEnabled(false);
+      placeTokens();
     }
 
     function applySetup() {
@@ -816,7 +820,6 @@
     rollBtn.addEventListener("click", handleRoll);
 
     hubBtn.addEventListener("click", () => {
-      // Change this to your actual hub page if needed
       window.location.href = "index.html";
     });
 
