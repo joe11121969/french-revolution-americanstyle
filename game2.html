@@ -141,6 +141,22 @@ function setText(msg) {
     document.getElementById("turnText").innerHTML = msg;
 }
 
+function declareWinner() {
+    if (playerHP <= 0 && outlawHP > 0) {
+        setText(`<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>`);
+        return true;
+    }
+    if (outlawHP <= 0 && playerHP > 0) {
+        setText(`<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>`);
+        return true;
+    }
+    if (playerHP <= 0 && outlawHP <= 0) {
+        setText(`<strong>Both duelists fall — it's a draw!</strong>`);
+        return true;
+    }
+    return false;
+}
+
 function playRound() {
 
     if (playerHP <= 0 || outlawHP <= 0) return;
@@ -164,35 +180,8 @@ function playRound() {
     setText(text);
     updateHP();
 
-    if (playerHP <= 0 || outlawHP <= 0) {
-        finalRoll();
-    }
-}
-
-function finalRoll() {
-
-    const p = rollDie();
-    const o = rollDie();
-
-    let text = `<strong>FINAL ROLL!</strong><br>
-                You rolled <strong>${p}</strong><br>
-                Outlaw rolled <strong>${o}</strong><br><br>`;
-
-    if (p > o) {
-        text += `<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>`;
-    } else if (o > p) {
-        text += `<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>`;
-    } else {
-        if (playerHP > outlawHP) {
-            text += `<strong>It's a tie, but you had more HP — YOU WIN!</strong>`;
-        } else if (outlawHP > playerHP) {
-            text += `<strong>It's a tie, but the outlaw had more HP — YOU LOSE!</strong>`;
-        } else {
-            text += `<strong>Perfect tie — it's a draw!</strong>`;
-        }
-    }
-
-    setText(text);
+    // IMMEDIATE WIN CHECK — NO FINAL ROLL
+    declareWinner();
 }
 
 /* NEW ROUND RESET */
