@@ -2,182 +2,173 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Duel at Sundown</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: "Segoe UI", sans-serif;
-    color: white;
-    text-align: center;
+    body {
+        margin: 0;
+        padding: 0;
+        background: url('cartable.png') no-repeat center center fixed;
+        background-size: cover;
+        font-family: Georgia, serif;
+        color: #fff;
+        height: 100vh;
+        overflow: hidden;
+    }
 
-    /* FULL BACKGROUND */
-    background-image: url("cardgameart/cartable.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    /* Back Arrow */
+    #backArrow {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        font-size: 40px;
+        cursor: pointer;
+        color: #fff;
+        text-shadow: 2px 2px 4px black;
+        z-index: 20;
+    }
 
-    height: 100vh;
-    overflow: hidden;
-  }
+    #gameContainer {
+        position: absolute;
+        bottom: 12%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        background: rgba(0, 0, 0, 0.55);
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 0 20px #000;
+    }
 
-  /* GAME UI CONTAINER — positioned on lower table area */
-  #gameArea {
-    position: absolute;
-    bottom: 12%; /* tuned for bottom-third table placement */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 600px;
-    background: rgba(0,0,0,0.45);
-    padding: 20px;
-    border-radius: 12px;
-    border: 2px solid rgba(255,255,255,0.2);
-  }
+    h1 {
+        margin-top: 0;
+        font-size: 36px;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px 4px black;
+    }
 
-  h1 {
-    margin-top: 0;
-    font-size: 2em;
-    text-shadow: 2px 2px 4px black;
-  }
+    #log {
+        height: 260px;
+        overflow-y: auto;
+        background: rgba(0, 0, 0, 0.35);
+        padding: 10px;
+        border-radius: 8px;
+        text-align: left;
+        font-size: 18px;
+        line-height: 1.4;
+    }
 
-  .hpBar {
-    margin: 10px 0;
-    font-size: 1.2em;
-  }
+    button {
+        margin-top: 15px;
+        padding: 12px 25px;
+        font-size: 20px;
+        cursor: pointer;
+        background: #8b0000;
+        color: white;
+        border: 2px solid #300;
+        border-radius: 6px;
+        transition: 0.2s;
+    }
 
-  #log {
-    margin-top: 15px;
-    min-height: 80px;
-    font-size: 1.1em;
-    line-height: 1.4em;
-  }
-
-  button {
-    margin: 10px;
-    padding: 12px 25px;
-    font-size: 1.1em;
-    background: #b33;
-    border: none;
-    border-radius: 8px;
-    color: white;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-
-  button:hover {
-    background: #d44;
-    transform: scale(1.05);
-  }
-
-  button:disabled {
-    background: #555;
-    transform: none;
-    cursor: default;
-  }
-
-  /* BACK ARROW */
-  #backBtn {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    font-size: 32px;
-    color: white;
-    background: rgba(0,0,0,0.4);
-    padding: 10px 18px;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-    z-index: 9999;
-    transition: 0.2s;
-  }
-
-  #backBtn:hover {
-    background: rgba(255,255,255,0.25);
-    transform: scale(1.1);
-  }
+    button:hover {
+        background: #b30000;
+    }
 </style>
 </head>
 
 <body>
 
-<!-- BACK BUTTON -->
-<div id="backBtn" onclick="window.location.href='index.html'">⬅</div>
+<div id="backArrow" onclick="window.location.href='index.html'">&#8592;</div>
 
-<div id="gameArea">
-  <h1>Duel at Sundown</h1>
+<div id="gameContainer">
+    <h1>Duel at Sundown</h1>
 
-  <div class="hpBar" id="playerHP">Your HP: 3</div>
-  <div class="hpBar" id="enemyHP">Outlaw HP: 3</div>
+    <div id="log"></div>
 
-  <button id="rollBtn">Roll Dice</button>
-  <button id="restartBtn" style="display:none;">Play Again</button>
-
-  <div id="log"></div>
+    <button onclick="playRound()">Roll Dice</button>
 </div>
 
 <script>
-let playerHP = 3;
-let enemyHP = 3;
+let playerHP = 20;
+let outlawHP = 20;
 
-const playerHPDiv = document.getElementById("playerHP");
-const enemyHPDiv = document.getElementById("enemyHP");
-const logDiv = document.getElementById("log");
-const rollBtn = document.getElementById("rollBtn");
-const restartBtn = document.getElementById("restartBtn");
-
-function updateHP() {
-  playerHPDiv.textContent = "Your HP: " + playerHP;
-  enemyHPDiv.textContent = "Outlaw HP: " + enemyHP;
+function rollDie() {
+    return Math.floor(Math.random() * 6) + 1;
 }
 
 function log(msg) {
-  logDiv.innerHTML = msg;
+    const logBox = document.getElementById("log");
+    logBox.innerHTML += msg + "<br>";
+    logBox.scrollTop = logBox.scrollHeight;
 }
 
-rollBtn.onclick = () => {
-  const playerRoll = Math.ceil(Math.random() * 6);
-  const enemyRoll = Math.ceil(Math.random() * 6);
+function playRound() {
 
-  let roundText = `You rolled <b>${playerRoll}</b> — Outlaw rolled <b>${enemyRoll}</b><br>`;
+    // If duel is already over, stop
+    if (playerHP <= 0 || outlawHP <= 0) return;
 
-  if (playerRoll > enemyRoll) {
-    enemyHP--;
-    roundText += "🎯 You hit the outlaw!";
-  } else if (enemyRoll > playerRoll) {
-    playerHP--;
-    roundText += "💥 The outlaw hits you!";
-  } else {
-    roundText += "🤝 Standoff — no damage.";
-  }
+    const p1 = rollDie();
+    const p2 = rollDie();
+    const o1 = rollDie();
+    const o2 = rollDie();
 
-  updateHP();
-  log(roundText);
+    const playerRoll = p1 + p2;
+    const outlawRoll = o1 + o2;
 
-  if (playerHP <= 0 || enemyHP <= 0) {
-    rollBtn.disabled = true;
-    restartBtn.style.display = "inline-block";
+    log(`<strong>You:</strong> ${p1} + ${p2} = <strong>${playerRoll}</strong>`);
+    log(`<strong>Outlaw:</strong> ${o1} + ${o2} = <strong>${outlawRoll}</strong>`);
 
-    if (playerHP <= 0 && enemyHP <= 0) {
-      log("Both duelists fall... It's a draw.");
-    } else if (playerHP <= 0) {
-      log("💀 The outlaw wins the duel...");
+    if (playerRoll > outlawRoll) {
+        outlawHP -= 4;
+        log(`<span style='color:#6f3;'>You hit the outlaw! -4 HP</span>`);
+    } else if (outlawRoll > playerRoll) {
+        playerHP -= 4;
+        log(`<span style='color:#f66;'>The outlaw hits you! -4 HP</span>`);
     } else {
-      log("🏆 You win! The outlaw is defeated.");
+        log("<em>Both shots miss!</em>");
     }
-  }
-};
 
-restartBtn.onclick = () => {
-  playerHP = 3;
-  enemyHP = 3;
-  updateHP();
-  log("");
-  rollBtn.disabled = false;
-  restartBtn.style.display = "none";
-};
+    log(`<strong>HP:</strong> You ${playerHP} | Outlaw ${outlawHP}`);
+    log("<hr>");
+
+    // Check for duel end
+    if (playerHP <= 0 || outlawHP <= 0) {
+        finalRoll();
+    }
+}
+
+function finalRoll() {
+
+    log("<strong>FINAL ROLL TO DECIDE THE DUEL!</strong>");
+
+    const p1 = rollDie();
+    const p2 = rollDie();
+    const o1 = rollDie();
+    const o2 = rollDie();
+
+    const playerFinal = p1 + p2;
+    const outlawFinal = o1 + o2;
+
+    log(`You rolled ${p1} + ${p2} = <strong>${playerFinal}</strong>`);
+    log(`Outlaw rolled ${o1} + ${o2} = <strong>${outlawFinal}</strong>`);
+
+    if (playerFinal > outlawFinal) {
+        log("<span style='color:#6f3; font-size:22px;'><strong>You win the duel!</strong></span>");
+    } else if (outlawFinal > playerFinal) {
+        log("<span style='color:#f66; font-size:22px;'><strong>The outlaw wins the duel!</strong></span>");
+    } else {
+        // Tie breaker by HP
+        if (playerHP > outlawHP) {
+            log("<strong>It's a tie, but you had more HP — YOU WIN!</strong>");
+        } else if (outlawHP > playerHP) {
+            log("<strong>It's a tie, but the outlaw had more HP — YOU LOSE!</strong>");
+        } else {
+            log("<strong>Perfect tie — it's a draw!</strong>");
+        }
+    }
+}
 </script>
 
 </body>
