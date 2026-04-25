@@ -61,14 +61,14 @@
       pointer-events: none;
     }
 
-    /* Adjusted to sit over the printed hearts on gameboard2 */
-    #elfHpBox {
+    /* Dwarven Fighter ❤️ top-left, Elf Mage ❤️ top-right */
+    #dwarfHpBox {
       top: 40px;
       left: 80px;
     }
 
-    #dwarfHpBox {
-      bottom: 60px;
+    #elfHpBox {
+      top: 40px;
       right: 80px;
     }
 
@@ -498,20 +498,19 @@
       }
     }
 
-    // place token with center/offset logic
+    // place tokens with center/offset logic
     function placeTokens() {
       const playerNode = getNode(playerPos);
       const enemyNode = getNode(enemyPos);
       if (!playerNode || !enemyNode) return;
 
-      // same space → offset left/right
+      const playerEl = playerToken === "elf" ? elfTokenEl : dwarfTokenEl;
+      const enemyEl = enemyToken === "elf" ? elfTokenEl : dwarfTokenEl;
+
       if (playerPos === enemyPos) {
         const offset = 10;
         const baseX = playerNode.x;
         const baseY = playerNode.y;
-
-        const playerEl = playerToken === "elf" ? elfTokenEl : dwarfTokenEl;
-        const enemyEl = enemyToken === "elf" ? elfTokenEl : dwarfTokenEl;
 
         playerEl.style.left = `calc(${baseX}% - ${offset}px)`;
         playerEl.style.top = `calc(${baseY}% - 0px)`;
@@ -519,10 +518,6 @@
         enemyEl.style.left = `calc(${baseX}% + ${offset}px)`;
         enemyEl.style.top = `calc(${baseY}% - 0px)`;
       } else {
-        // separate spaces → each centered
-        const playerEl = playerToken === "elf" ? elfTokenEl : dwarfTokenEl;
-        const enemyEl = enemyToken === "elf" ? elfTokenEl : dwarfTokenEl;
-
         playerEl.style.left = `calc(${playerNode.x}% - 0px)`;
         playerEl.style.top = `calc(${playerNode.y}% - 0px)`;
 
