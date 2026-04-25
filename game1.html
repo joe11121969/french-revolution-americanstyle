@@ -213,28 +213,36 @@ function showDown() {
   showBtn.disabled = true;
 }
 
-// ---- Poker Ranking Logic ----
+// ---- FIXED POKER RANKING LOGIC ----
 function rankHand(hand) {
   const valuesMap = Object.fromEntries(values.map((v,i)=>[v,i]));
   const sorted = [...hand].sort((a,b)=>valuesMap[a.v]-valuesMap[b.v]);
+
   const counts = {};
-  for (let c of sorted) counts[c.v]=(counts[c.v]||0)+1;
-  const suitsArr = sorted.map(c=>c.s);
-  const valsArr = sorted.map(c=>valuesMap[c.v]);
-  const flush = suitsArr.every(s=>s===suitsArr[0]);
-  const straight = valsArr.every((v,i,a)=> i===0 || v===a[i-1]+1);
-  const groups = Object.values(counts).sort((a,b)=>b-a).join('');
+  for (let c of sorted) counts[c.v] = (counts[c.v] || 0) + 1;
+
+  const suitsArr = sorted.map(c => c.s);
+  const valsArr = sorted.map(c => valuesMap[c.v]);
+
+  const flush = suitsArr.every(s => s === suitsArr[0]);
+  const straight = valsArr.every((v,i,a) => i === 0 || v === a[i-1] + 1);
+
+  // FIX: normalized group string
+  const groups = Object.values(counts).sort((a,b) => b - a).join('');
+
   let rankValue = 0, name = '';
-  if (straight && flush) { rankValue=8; name='Straight Flush'; }
-  else if (groups==='41') { rankValue=7; name='Four of a Kind'; }
-  else if (groups==='32') { rankValue=6; name='Full House'; }
-  else if (flush) { rankValue=5; name='Flush'; }
-  else if (straight) { rankValue=4; name='Straight'; }
-  else if (groups==='31') { rankValue=3; name='Three of a Kind'; }
-  else if (groups==='221') { rankValue=2; name='Two Pair'; }
-  else if (groups==='2111') { rankValue=1; name='One Pair'; }
-  else { rankValue=0; name='High Card'; }
-  return { rankValue, name, high: Math.max(...valsArr)};
+
+  if (straight && flush) { rankValue = 8; name = 'Straight Flush'; }
+  else if (groups === '41') { rankValue = 7; name = 'Four of a Kind'; }
+  else if (groups === '32') { rankValue = 6; name = 'Full House'; }
+  else if (flush) { rankValue = 5; name = 'Flush'; }
+  else if (straight) { rankValue = 4; name = 'Straight'; }
+  else if (groups === '31') { rankValue = 3; name = 'Three of a Kind'; }
+  else if (groups === '221') { rankValue = 2; name = 'Two Pair'; }
+  else if (groups === '2111') { rankValue = 1; name = 'One Pair'; }
+  else { rankValue = 0; name = 'High Card'; }
+
+  return { rankValue, name, high: Math.max(...valsArr) };
 }
 
 function compareRank(a,b){
