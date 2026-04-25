@@ -30,7 +30,7 @@
     z-index: 0;
   }
 
-  /* Banner container (SMALL + CROPPED) */
+  /* Banner container */
   #bannerContainer {
     width: 900px;
     height: 120px;
@@ -38,7 +38,6 @@
     position: relative;
     z-index: 1;
     overflow: hidden;
-    background: transparent;
     border-radius: 10px;
   }
 
@@ -49,19 +48,32 @@
     object-position: center;
   }
 
-  /* Thumbnail buttons */
+  /* Thumbnail wrappers */
+  .thumbWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    z-index: 1;
+  }
+
   .thumbButton {
     height: 150px;
     cursor: pointer;
     border: 2px solid white;
     border-radius: 10px;
     transition: transform 0.2s;
-    z-index: 1;
-    margin: 20px;
   }
 
   .thumbButton:hover {
     transform: scale(1.1);
+  }
+
+  .thumbLabel {
+    margin-top: 8px;
+    color: white;
+    font-size: 18px;
+    text-shadow: 1px 1px 3px black;
   }
 
   /* Thumbnail row */
@@ -86,12 +98,25 @@
 <div id="thumbRow">
 
   <!-- Comic Chapter 1 -->
-  <img src="capter1/c1p1.png" class="thumbButton"
-       onclick="window.location.href='viewer.html'">
+  <div class="thumbWrapper">
+    <img src="capter1/c1p1.png" class="thumbButton"
+         onclick="window.location.href='viewer.html'">
+    <div class="thumbLabel">Comic Chapter 1</div>
+  </div>
 
-  <!-- Poker Game Thumbnail (UPDATED TO USE cardback.png) -->
-  <img src="cardgameart/cardback.png" class="thumbButton"
-       onclick="window.location.href='game1.html'">
+  <!-- Poker Game -->
+  <div class="thumbWrapper">
+    <img src="cardgameart/cardback.png" class="thumbButton"
+         onclick="window.location.href='game1.html'">
+    <div class="thumbLabel">Poker Game</div>
+  </div>
+
+  <!-- NEW: Duel at Sundown -->
+  <div class="thumbWrapper">
+    <img src="cardgameart/as.png" class="thumbButton"
+         onclick="window.location.href='duel.html'">
+    <div class="thumbLabel">Duel at Sundown</div>
+  </div>
 
 </div>
 
